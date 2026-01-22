@@ -25,7 +25,7 @@
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
-
+/*
   function parseCSV(csv) {
     console.log('[CSV] Parsing CSV');
     const [headerLine, ...lines] = csv.trim().split('\n');
@@ -36,6 +36,39 @@
       return Object.fromEntries(headers.map((h, idx) => [h, values[idx]]));
     });
   }
+*/
+
+	function parseCSV(csv) {
+	  console.log('[CSV] Mulai parsing & trimming data');
+
+	  const [headerLine, ...lines] = csv.trim().split('\n');
+	  const headers = headerLine
+		.split(';')
+		.map(h => h.trim().toLowerCase());
+
+	  return lines
+		.filter(line => line.trim() !== '')
+		.map((line, idx) => {
+		  const values = line.split(';');
+
+		  const row = {};
+		  headers.forEach((h, i) => {
+			let val = values[i] ?? '';
+
+			// TRIM semua kolom
+			val = String(val).trim();
+
+			// Trim khusus kolom penting (lebih eksplisit)
+			if (['idsbr', 'latitude', 'longitude', 'hasil'].includes(h)) {
+			  val = val.trim();
+			}
+
+			row[h] = val;
+		  });
+
+		  return row;
+		});
+	}
 
   async function loadCSVFromFile() {
     return new Promise((resolve, reject) => {
@@ -234,8 +267,14 @@
       document.querySelector('#apply-filter-btn').click();
 
       await waitForSearchResultMatch(row.idsbr);
+	  
+	  const gcBadgeEl = document.querySelector('.gc-badge');
+	  const isSudahGC =
+		  gcBadgeEl &&
+		  gcBadgeEl.textContent &&
+		  gcBadgeEl.textContent.trim() === 'Sudah GC';
 
-      if (document.querySelector('.gc-badge') || document.querySelector('.tidak-aktif')) {
+      if (isSudahGC || document.querySelector('.tidak-aktif')) {
         console.log('[STEP] Sudah GC / Tidak Aktif → skip & cache');
         gcCache.add(row.idsbr);
         saveGCCache(gcCache);
