@@ -195,7 +195,7 @@
 		top: 40px;
 		right: 20px;
 		z-index: 99999;
-		background: rgba(0, 0, 0, 0.2); /* transparan 20% */
+		background: rgba(0, 0, 0, 0.5); /* transparan 50% */
 		color: #0f0;
 		padding: 12px;
 		font-family: monospace;
@@ -209,13 +209,13 @@
 	  `;
 
 	  box.innerHTML = `
-		  <div><b>GC Progress</b></div>
+		  <div><b>GC BPS 3326 Progress</b></div>
 		  <div id="gc-file"></div>
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
-		  <div style="flex:1; overflow-y:auto; background:#000; padding:6px;" id="gc-log"></div>
+		  <div style="flex:1; overflow-y:auto; padding:6px;" id="gc-log"></div>
 		  <button id="gc-download" style="margin-top:6px;">Download CSV</button>
 		`;
 
