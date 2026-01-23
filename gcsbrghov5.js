@@ -359,8 +359,8 @@
 		  console.log('[STEP] Dialog konfirmasi tidak muncul → lanjut');
 		}
 
-		console.log('[STEP] Menunggu status sukses');
-		await waitForSelector('.swal2-icon-success', 120000);
+		console.log('[STEP] Simpan data (dengan retry)');
+		await saveWithRetry(3);
 
 		  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 		  console.log(`[DELAY] Tunggu sebelum klik OK ${delay} ms`);
@@ -403,6 +403,61 @@
 	  if (!p) return null;
 
 	  return p.textContent.trim();
+	}
+
+	async function waitForSwalResult(timeout = 120000) {
+	  const start = Date.now();
+
+	  while (Date.now() - start < timeout) {
+		if (document.querySelector('.swal2-icon-success')) {
+		  return 'success';
+		}
+
+		if (document.querySelector('.swal2-icon-error')) {
+		  return 'error';
+		}
+
+		await sleep(200);
+	  }
+
+	  throw new Error('Tidak muncul dialog success maupun error');
+	}
+
+	async function saveWithRetry(maxRetry = 3) {
+	  for (let attempt = 1; attempt <= maxRetry; attempt++) {
+		console.log(`[SAVE] Percobaan simpan ke-${attempt}`);
+
+		// Klik SIMPAN
+		(await waitForSelector('#save-tandai-usaha-btn')).click();
+
+		try {
+		  const result = await waitForSwalResult(120000);
+
+		  if (result === 'success') {
+			console.log('[SAVE] Berhasil (success dialog)');
+			return; // keluar dari fungsi → sukses
+		  }
+
+		  if (result === 'error') {
+			console.warn('[SAVE] Dialog error muncul');
+
+			await sleep(1000);
+			
+			// Klik OK error
+			(await waitForSelector('.swal2-confirm')).click();
+
+			// Delay kecil sebelum retry
+			await sleep(1000);
+
+			continue; // ulangi loop
+		  }
+
+		} catch (err) {
+		  console.warn(`[SAVE] Tidak ada dialog (${err.message})`);
+		}
+	  }
+
+	  throw new Error(`Gagal simpan setelah ${maxRetry} percobaan`);
 	}
 
   /* ===================== cari IDSBR ===================== */
