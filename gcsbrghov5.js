@@ -7,6 +7,7 @@
   let csvFileName = '-';
   let statSuccess = 0;
   let statFailed = 0;
+  let startTime = Date.now();
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
@@ -216,6 +217,7 @@
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
 		  <div id="gc-stat"></div>
+		  <div id="gc-eta"></div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
 		  <div style="flex:1; overflow-y:auto; padding:6px;" id="gc-log"></div>
@@ -264,16 +266,30 @@
 	  if (timerEl) timerEl.textContent = timer;
 	}
 
-	function updateStat() {
+	function updateStat() {//update statistik jumlah sukses dan gagal
 	  document.getElementById('gc-stat').textContent =
 		`Sukses: ${statSuccess} | Gagal: ${statFailed}`;
 	}
 
-	function updateProgress(processed, total) {
+	function updateProgress(processed, total) {//update progress bar
 	  const percent = Math.floor((processed / total) * 100);
 	  document.getElementById('gc-progress-bar').style.width = percent + '%';
 	  document.getElementById('gc-progress-text').textContent =
 		`Progress: ${processed}/${total} (${percent}%)`;
+	}
+
+	function updateETA(processed, total) {//update Estimasi waktu selesai (ETA)
+	  if (processed === 0) return;
+
+	  const elapsed = Date.now() - startTime;
+	  const avgPerItem = elapsed / processed;
+	  const remaining = total - processed;
+	  const etaMs = avgPerItem * remaining;
+
+	  const etaMin = Math.ceil(etaMs / 60000);
+
+	  document.getElementById('gc-eta').textContent =
+		`ETA: ~${etaMin} menit`;
 	}
 
   function exportRekapCSV() {
@@ -560,10 +576,12 @@
 
   for (let i = 0; i < rows.length; i++) {
     updateDashboard(i + 1);
-	updateProgress(i + 1, rows.length);
-	updateStat();
 
     await processRow(rows[i], i);
+	
+	updateProgress(i + 1, rows.length);
+	updateETA(i + 1, rows.length);
+	updateStat();
 
     const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
     console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
