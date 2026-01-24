@@ -198,7 +198,7 @@
 		top: 40px;
 		right: 20px;
 		z-index: 99999;
-		background: rgba(0, 0, 0, 0.5); /* transparan 50% */
+		background: rgba(0, 0, 0, 0.75); /* transparan 75% */
 		color: #0f0;
 		padding: 12px;
 		font-family: monospace;
