@@ -5,6 +5,8 @@
   console.log('[INIT] Script dimulai');
 
   let csvFileName = '-';
+  let statSuccess = 0;
+  let statFailed = 0;
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
@@ -209,10 +211,11 @@
 	  `;
 
 	  box.innerHTML = `
-		  <div><b>GC BPS 3326 Progress</b></div>
+		  <div><b>GC SBR 3326 by Ghoz</b></div>
 		  <div id="gc-file"></div>
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
+		  <div id="gc-stat"></div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
 		  <div style="flex:1; overflow-y:auto; padding:6px;" id="gc-log"></div>
@@ -259,6 +262,11 @@
 	  if (totalEl) totalEl.textContent = `Eligible: ${rows.length}`;
 	  if (currentEl) currentEl.textContent = `Progress: ${current}/${rows.length}`;
 	  if (timerEl) timerEl.textContent = timer;
+	}
+
+	function updateStat() {
+	  document.getElementById('gc-stat').textContent =
+		`Sukses: ${statSuccess} | Gagal: ${statFailed}`;
 	}
 
 	function updateProgress(processed, total) {
@@ -387,6 +395,7 @@
       gcCache.add(row.idsbr);
       saveGCCache(gcCache);
       failedAttempt = 0;
+	  statSuccess++;
 
       delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
       console.log(`[DELAY] Tunggu ${delay} ms`);
@@ -394,7 +403,8 @@
 
     } catch (err) {
       failedAttempt++;
-      console.error(`[ERROR] ${err.message}`);
+      statFailed++;
+	  console.error(`[ERROR] ${err.message}`);
 
       if (failedAttempt >= MAX_FAILED_ATTEMPT) {
         console.warn('[COOLDOWN] Gagal berulang, cooldown 3 menit');
@@ -551,6 +561,7 @@
   for (let i = 0; i < rows.length; i++) {
     updateDashboard(i + 1);
 	updateProgress(i + 1, rows.length);
+	updateStat();
 
     await processRow(rows[i], i);
 
