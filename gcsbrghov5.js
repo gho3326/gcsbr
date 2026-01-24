@@ -212,7 +212,7 @@
 	  `;
 
 	  box.innerHTML = `
-		  <div><b>GC SBR 3326 by Ghoz</b></div>
+		  <div><b>GC SBR 3326 by MasGhoz</b></div>
 		  <div id="gc-file"></div>
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
