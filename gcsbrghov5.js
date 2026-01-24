@@ -575,14 +575,14 @@
   console.log('[LOOP] Mulai processing');
 
   for (let i = 0; i < rows.length; i++) {
-    updateDashboard(i + 1);
-
-    await processRow(rows[i], i);
-	
+    
+	updateDashboard(i + 1);
 	updateProgress(i + 1, rows.length);
 	updateStat();
 	updateETA(i + 1, rows.length);
 
+    await processRow(rows[i], i);
+	
     const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
     console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
     await sleep(delay);
