@@ -289,7 +289,7 @@
 	  const etaMin = Math.ceil(etaMs / 60000);
 
 	  document.getElementById('gc-eta').textContent =
-		`ETA: ~${etaMin} menit`;
+		`Estimasi selesai: ~${etaMin} menit`;
 	}
 
   function exportRekapCSV() {
@@ -580,8 +580,8 @@
     await processRow(rows[i], i);
 	
 	updateProgress(i + 1, rows.length);
-	updateETA(i + 1, rows.length);
 	updateStat();
+	updateETA(i + 1, rows.length);
 
     const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
     console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
