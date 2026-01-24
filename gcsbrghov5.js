@@ -216,6 +216,13 @@
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
 		  <div style="flex:1; overflow-y:auto; padding:6px;" id="gc-log"></div>
+		  <div style="margin-top:6px;">
+			  <div style="background:#333; height:10px; border-radius:6px; overflow:hidden;">
+				<div id="gc-progress-bar"
+					 style="height:100%; width:0%; background:#0f0;"></div>
+			  </div>
+			  <div id="gc-progress-text" style="margin-top:4px;"></div>
+			</div>
 		  <button id="gc-download" style="margin-top:6px;">Download CSV</button>
 		`;
 
@@ -252,6 +259,13 @@
 	  if (totalEl) totalEl.textContent = `Eligible: ${rows.length}`;
 	  if (currentEl) currentEl.textContent = `Progress: ${current}/${rows.length}`;
 	  if (timerEl) timerEl.textContent = timer;
+	}
+
+	function updateProgress(processed, total) {
+	  const percent = Math.floor((processed / total) * 100);
+	  document.getElementById('gc-progress-bar').style.width = percent + '%';
+	  document.getElementById('gc-progress-text').textContent =
+		`Progress: ${processed}/${total} (${percent}%)`;
 	}
 
   function exportRekapCSV() {
@@ -536,6 +550,8 @@
 
   for (let i = 0; i < rows.length; i++) {
     updateDashboard(i + 1);
+	updateProgress(i + 1, rows.length);
+
     await processRow(rows[i], i);
 
     const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
