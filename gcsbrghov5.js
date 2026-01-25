@@ -225,8 +225,10 @@
 	  box.innerHTML = `
 		  <div><b>GC SBR 3326 by MasGhoz</b></div>
 		  <div id="gc-file"></div>
+		  <!--
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
+		  -->
 		  <div id="gc-stat"></div>
 		  <div id="gc-eta"></div>
 		  <div id="gc-timer"></div>
@@ -267,13 +269,13 @@
 
   function updateDashboard(current = 0, timer = '') {
 	  const fileEl = document.getElementById('gc-file');
-	  const totalEl = document.getElementById('gc-total');
-	  const currentEl = document.getElementById('gc-current');
+	  //const totalEl = document.getElementById('gc-total');
+	  //const currentEl = document.getElementById('gc-current');
 	  const timerEl = document.getElementById('gc-timer');
 
 	  if (fileEl) fileEl.textContent = `File: ${csvFileName}`;
-	  if (totalEl) totalEl.textContent = `Eligible: ${rows.length}`;
-	  if (currentEl) currentEl.textContent = `Progress: ${current}/${rows.length}`;
+	  //if (totalEl) totalEl.textContent = `Eligible: ${rows.length}`;
+	  //if (currentEl) currentEl.textContent = `Progress: ${current}/${rows.length}`;
 	  if (timerEl) timerEl.textContent = timer;
 	}
 
