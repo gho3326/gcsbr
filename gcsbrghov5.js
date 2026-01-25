@@ -305,7 +305,7 @@
 		const mm = String(finishTime.getMinutes()).padStart(2, '0');
 
 		document.getElementById('gc-eta').textContent =
-		`Estimasi selesai: ± ${etaMin} menit (Sekitar jam ${hh}:${mm})`;
+		`Selesai: ±${etaMin} menit lagi (Jam ${hh}:${mm})`;
 	}
 
   function exportRekapCSV() {
