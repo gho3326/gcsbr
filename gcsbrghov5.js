@@ -26,14 +26,15 @@
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
   
-	function formatFinishTime(msFromNow) {
-		if (!msFromNow || msFromNow <= 0) return '-';
+	function formatDuration(ms) {
+	  const totalMinutes = Math.ceil(ms / 60000);
 
-		const finish = new Date(Date.now() + msFromNow);
-		const hh = String(finish.getHours()).padStart(2, '0');
-		const mm = String(finish.getMinutes()).padStart(2, '0');
-
-		return `${hh}:${mm}`;
+	  if (totalMinutes >= 60) {
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = totalMinutes % 60;
+		return `${hours} jam ${minutes} menit`;
+	  }
+	  return `${totalMinutes} menit`;
 	}
 
   /* ===================== CSV ===================== */
@@ -291,21 +292,35 @@
 	function updateETA(processed, total) {//update Estimasi waktu selesai (ETA)
 		if (processed === 0 || total === 0) return;
 
-		const elapsed = Date.now() - startTime;
+		const now = Date.now();
+		const elapsed = now - startTime;
 		const avgPerItem = elapsed / processed;
 		const remaining = total - processed;
 		const etaMs = Math.max(0, avgPerItem * remaining);
 
-		// ETA dalam menit
-		const etaMin = Math.ceil(etaMs / 60000);
+		// === PROSES BELUM SELESAI ===
+		if (processed < total) {
+			const etaText = formatDuration(etaMs);
 
-		// Hitung jam selesai
-		const finishTime = new Date(Date.now() + etaMs);
+			const finishTime = new Date(now + etaMs);
+			const hh = String(finishTime.getHours()).padStart(2, '0');
+			const mm = String(finishTime.getMinutes()).padStart(2, '0');
+
+			document.getElementById('gc-eta').textContent =
+			  `Selesai: ± ${etaText} lagi (Jam ${hh}:${mm})`;
+
+			return;
+		}
+
+		// === PROSES SELESAI ===
+		const totalDurationText = formatDuration(elapsed);
+
+		const finishTime = new Date(now);
 		const hh = String(finishTime.getHours()).padStart(2, '0');
 		const mm = String(finishTime.getMinutes()).padStart(2, '0');
 
 		document.getElementById('gc-eta').textContent =
-		`Selesai: ±${etaMin} menit lagi (Jam ${hh}:${mm})`;
+			`Selesai Jam ${hh}:${mm} · Total: ${totalDurationText}`;
 	}
 
   function exportRekapCSV() {
@@ -490,7 +505,7 @@
 		console.log(`[SAVE] Percobaan simpan ke-${attempt}`);
 
 		// Klik SIMPAN
-		(await waitForSelector('#save-tandai-usaha-btn')).click();
+		//(await waitForSelector('#save-tandai-usaha-btn')).click();
 
 		try {
 		  const result = await waitForSwalResult(120000);
