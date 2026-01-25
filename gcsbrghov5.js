@@ -18,13 +18,23 @@
 
   /* ===================== UTIL ===================== */
 
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+	function sleep(ms) {
+		return new Promise(resolve => setTimeout(resolve, ms));
+	}
 
-  function randomDelay(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
+	function randomDelay(min, max) {
+		return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+  
+	function formatFinishTime(msFromNow) {
+		if (!msFromNow || msFromNow <= 0) return '-';
+
+		const finish = new Date(Date.now() + msFromNow);
+		const hh = String(finish.getHours()).padStart(2, '0');
+		const mm = String(finish.getMinutes()).padStart(2, '0');
+
+		return `${hh}:${mm}`;
+	}
 
   /* ===================== CSV ===================== */
 
@@ -279,17 +289,23 @@
 	}
 
 	function updateETA(processed, total) {//update Estimasi waktu selesai (ETA)
-	  if (processed === 0) return;
+		if (processed === 0 || total === 0) return;
 
-	  const elapsed = Date.now() - startTime;
-	  const avgPerItem = elapsed / processed;
-	  const remaining = total - processed;
-	  const etaMs = avgPerItem * remaining;
+		const elapsed = Date.now() - startTime;
+		const avgPerItem = elapsed / processed;
+		const remaining = total - processed;
+		const etaMs = Math.max(0, avgPerItem * remaining);
 
-	  const etaMin = Math.ceil(etaMs / 60000);
+		// ETA dalam menit
+		const etaMin = Math.ceil(etaMs / 60000);
 
-	  document.getElementById('gc-eta').textContent =
-		`Estimasi selesai: ~${etaMin} menit`;
+		// Hitung jam selesai
+		const finishTime = new Date(Date.now() + etaMs);
+		const hh = String(finishTime.getHours()).padStart(2, '0');
+		const mm = String(finishTime.getMinutes()).padStart(2, '0');
+
+		document.getElementById('gc-eta').textContent =
+		`Estimasi selesai: ± ${etaMin} menit (Sekitar jam ${hh}:${mm})`;
 	}
 
   function exportRekapCSV() {
@@ -435,6 +451,8 @@
     }
   }
   
+  //------------ FUNGSI BANTU DETEKSI IDSBR TIDAK ADA ATAU GAGAL DICARI -------------------
+  
   function getSearchEmptyState() {
 	  const container = document.querySelector('#usaha-cards-container');
 	  if (!container) return null;
@@ -444,6 +462,8 @@
 
 	  return p.textContent.trim();
 	}
+
+//----------------- TUNGGU DIALOG SUKSES ATAU GAGAL MUNCUL -----------------------------
 
 	async function waitForSwalResult(timeout = 120000) {
 	  const start = Date.now();
@@ -462,6 +482,8 @@
 
 	  throw new Error('Tidak muncul dialog success maupun error');
 	}
+
+//----------------------- PERCOBAAN KLIK SUBMIT GC ---------------------------
 
 	async function saveWithRetry(maxRetry = 3) {
 	  for (let attempt = 1; attempt <= maxRetry; attempt++) {
