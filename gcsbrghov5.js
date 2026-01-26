@@ -263,7 +263,7 @@
 				<div id="gc-progress-bar"
 					 style="height:100%; width:0%; background:#0f0;"></div>
 			  </div>
-			  <div id="gc-progress-text" style="margin-top:4px;"></div>
+			  <div id="gc-progress-text" style="margin-top:4px; color: #0f0;"></div>
 			</div>
 		  <button id="gc-download" style="margin-top:6px;">Download CSV</button>
 		`;
