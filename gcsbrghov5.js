@@ -257,7 +257,7 @@
 		  <div id="gc-eta"></div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
-		  <div style="flex:1; overflow-y:auto; padding:6px;" id="gc-log"></div>
+		  <div style="flex:1; overflow-y:auto; padding:6px; color: #0f0;" id="gc-log"></div>
 		  <div style="margin-top:6px;">
 			  <div style="background:#333; height:10px; border-radius:6px; overflow:hidden;">
 				<div id="gc-progress-bar"
@@ -305,7 +305,7 @@
 
 	function updateStat() {//update statistik jumlah sukses dan gagal
 	  document.getElementById('gc-stat').innerHTML =
-		`<span style="color: green;">Sukses: <strong>${statSuccess}</strong></span> | 
+		`<span style="color: #0f0;">Sukses: <strong>${statSuccess}</strong></span> | 
 		<span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
 	}
 
