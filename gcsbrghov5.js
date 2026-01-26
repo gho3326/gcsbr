@@ -8,6 +8,9 @@
   let statSuccess = 0;
   let statFailed = 0;
   let startTime = Date.now();
+  
+  const LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/insertgc.php';
+
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
@@ -58,6 +61,67 @@
 		status,
 		avatar
 	  };
+	}
+
+	async function postLog(data) {
+	  const res = await fetch(LOG_URL, {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams(data)
+	  });
+
+	  if (!res.ok) {
+		throw new Error('Gagal POST ke server');
+	  }
+
+	  return res.text();
+	}
+
+	let idSesiGC = null;
+
+	async function logMulaiProses({ user, fileName, total }) {
+	  try {
+		const response = await postLog({
+		  tipe: 'mulai',
+		  nama: user.name,
+		  status: user.status,
+		  foto: user.avatar,
+		  file: fileName,
+		  sukses: 0,
+		  gagal: 0,
+		  total: total
+		});
+
+		idSesiGC = response.trim();
+		console.log('[GC] Session ID:', idSesiGC);
+
+	  } catch (err) {
+		console.error('[GC] Gagal log mulai:', err);
+	  }
+	}
+
+	async function logSelesaiProses({ sukses, gagal, total }) {
+	  if (!idSesiGC) {
+		console.warn('[GC] idSesi belum ada, skip log selesai');
+		return;
+	  }
+
+	  try {
+		await postLog({
+		  tipe: 'selesai',
+		  idsesi: idSesiGC,
+		  sukses: sukses,
+		  gagal: gagal,
+		  total: total
+		});
+
+		console.log('[GC] Log selesai terkirim');
+
+	  } catch (err) {
+		console.error('[GC] Gagal log selesai:', err);
+	  }
 	}
 
   /* ===================== CSV ===================== */
@@ -632,24 +696,40 @@
 	  }
 	}
 
-  /* ===================== LOOP tiap IDSBR ===================== */
+  /* ===================== POST DATA SAAT MULAI ===================== */
 
-  console.log('[LOOP] Mulai processing');
+	const user = getUserInfo();
+	await logMulaiProses({
+	  user,
+	  fileName: csvFileName,
+	  total: rows.length
+	});
 
-  for (let i = 0; i < rows.length; i++) {
-    
-	updateDashboard(i + 1);
-	updateProgress(i + 1, rows.length);
-	updateStat();
-	updateETA(i + 1, rows.length);
+	/* ===================== LOOP tiap IDSBR ===================== */
 
-    await processRow(rows[i], i);
-	
-    const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
-    console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
-    await sleep(delay);
-  }
+	console.log('[LOOP] Mulai processing');
 
-  console.log('[DONE] Semua proses selesai');
+	for (let i = 0; i < rows.length; i++) {
+		updateDashboard(i + 1);
+		updateProgress(i + 1, rows.length);
+		updateStat();
+		updateETA(i + 1, rows.length);
+
+		await processRow(rows[i], i);
+
+		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
+		console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
+		await sleep(delay);
+	}
+
+	/* ===================== POST DATA SAAT SELESAI ===================== */
+
+	await logSelesaiProses({
+	  sukses: statSuccess,
+	  gagal: statFailed,
+	  total: rows.length
+	});
+
+	console.log('[DONE] Semua proses selesai');
 
 })();
