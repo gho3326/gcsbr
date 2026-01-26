@@ -37,6 +37,29 @@
 	  return `${totalMinutes} menit`;
 	}
 
+	function getUserInfo() {
+	  const userEl = document.getElementById('dropdown-user');
+	  if (!userEl) {
+		console.warn('[USER] Dropdown user tidak ditemukan');
+		return null;
+	  }
+
+	  const name =
+		userEl.querySelector('.user-name')?.textContent.trim() || '-';
+
+	  const status =
+		userEl.querySelector('.user-status span')?.textContent.trim() || '-';
+
+	  const avatar =
+		userEl.querySelector('img.round')?.getAttribute('src') || '';
+
+	  return {
+		name,
+		status,
+		avatar
+	  };
+	}
+
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
@@ -223,7 +246,8 @@
 	  `;
 
 	  box.innerHTML = `
-		  <div><b>GC SBR 3326 by MasGhoz</b></div>
+		  <h4><b>GC SBR 3326 by MasGhoz</b></h4>
+		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses berjalan.</b></div>
 		  <div id="gc-file"></div>
 		  <!--
 		  <div id="gc-total"></div>
@@ -280,8 +304,8 @@
 	}
 
 	function updateStat() {//update statistik jumlah sukses dan gagal
-	  document.getElementById('gc-stat').textContent =
-		`Sukses: ${statSuccess} | Gagal: ${statFailed}`;
+	  document.getElementById('gc-stat').innerHTML =
+		`Sukses: <b>${statSuccess}</b> | <span style="color: red;">Gagal: <b>${statFailed}</b></span>`;
 	}
 
 	function updateProgress(processed, total) {//update progress bar
@@ -309,7 +333,7 @@
 			const mm = String(finishTime.getMinutes()).padStart(2, '0');
 
 			document.getElementById('gc-eta').textContent =
-			  `Selesai: ± ${etaText} lagi (Jam ${hh}:${mm})`;
+			  `Selesai: ± ${etaText} lagi (jam ${hh}:${mm})`;
 
 			return;
 		}
@@ -417,28 +441,15 @@
       console.log(`[DELAY] Tunggu sebelum klik SIMPAN ${delay} ms`);
       await sleep(delay);
 
-		(await waitForSelector('#save-tandai-usaha-btn')).click();
-		console.log('[STEP] Cek dialog konfirmasi');
+	  console.log('[STEP] Simpan data (dengan retry)');
+	  await saveWithRetry(3);
 
-		try {
-		  await waitForSelector('.swal2-icon-warning', 1000);
+	  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
+	  console.log(`[DELAY] Tunggu sebelum klik OK ${delay} ms`);
+	  await sleep(delay);
 
-		  console.log('[STEP] Dialog konfirmasi muncul → klik Ya');
-		  (await waitForSelector('.swal2-confirm')).click();
-
-		} catch {
-		  console.log('[STEP] Dialog konfirmasi tidak muncul → lanjut');
-		}
-
-		console.log('[STEP] Simpan data (dengan retry)');
-		await saveWithRetry(3);
-
-		  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
-		  console.log(`[DELAY] Tunggu sebelum klik OK ${delay} ms`);
-		  await sleep(delay);
-
-		console.log('[STEP] Klik OK sukses');
-		(await waitForSelector('.swal2-confirm')).click();
+	  console.log('[STEP] Klik OK sukses');
+	  (await waitForSelector('.swal2-confirm', 60000)).click();
 
       console.log('[SUCCESS] IDSBR berhasil');
       gcCache.add(row.idsbr);
@@ -508,7 +519,18 @@
 
 		// Klik SIMPAN
 		(await waitForSelector('#save-tandai-usaha-btn')).click();
+		
+		console.log('[STEP] Cek dialog konfirmasi');
+		try {
+		  await waitForSelector('.swal2-icon-warning', 2000);
 
+		  console.log('[STEP] Dialog konfirmasi muncul → klik Ya');
+		  (await waitForSelector('.swal2-confirm')).click();
+
+		} catch {
+		  console.log('[STEP] Dialog konfirmasi tidak muncul → lanjut');
+		}
+		
 		try {
 		  const result = await waitForSwalResult(120000);
 
@@ -544,7 +566,7 @@
 	async function cariIDSBR(idsbr, {
 	  maxRetry = 3,
 	  timeout = 120000,
-	  retryDelay = 3000
+	  retryDelay = 30000
 	} = {}) {
 
 	  console.log(`[SEARCH] Mulai cari IDSBR ${idsbr}`);
