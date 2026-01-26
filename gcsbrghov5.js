@@ -246,7 +246,7 @@
 	  `;
 
 	  box.innerHTML = `
-		  <h4 style="color: red;"><b>GC SBR 3326 by MasGhoz</b></h4>
+		  <h6 style="color: red;"><b>GC SBR 3326 by MasGhoz</b></h6>
 		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses berjalan.</b></div>
 		  <div id="gc-file"></div>
 		  <!--
