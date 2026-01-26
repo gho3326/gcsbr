@@ -233,7 +233,7 @@
 		right: 20px;
 		z-index: 99999;
 		background: rgba(0, 0, 0, 0.75); /* transparan 75% */
-		color: #0f0;
+		color: white;
 		padding: 12px;
 		font-family: monospace;
 		font-size: 13px;
@@ -305,7 +305,8 @@
 
 	function updateStat() {//update statistik jumlah sukses dan gagal
 	  document.getElementById('gc-stat').innerHTML =
-		`Sukses: <strong>${statSuccess}</strong> | <span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
+		`<span style="color: green;">Sukses: <strong>${statSuccess}</strong></span> | 
+		<span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
 	}
 
 	function updateProgress(processed, total) {//update progress bar
