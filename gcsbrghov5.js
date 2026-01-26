@@ -246,7 +246,7 @@
 	  `;
 
 	  box.innerHTML = `
-		  <h4><b>GC SBR 3326 by MasGhoz</b></h4>
+		  <h4 style="color: red;"><b>GC SBR 3326 by MasGhoz</b></h4>
 		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses berjalan.</b></div>
 		  <div id="gc-file"></div>
 		  <!--
@@ -305,7 +305,7 @@
 
 	function updateStat() {//update statistik jumlah sukses dan gagal
 	  document.getElementById('gc-stat').innerHTML =
-		`Sukses: <b>${statSuccess}</b> | <span style="color: red;">Gagal: <b>${statFailed}</b></span>`;
+		`Sukses: <strong>${statSuccess}</strong> | <span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
 	}
 
 	function updateProgress(processed, total) {//update progress bar
