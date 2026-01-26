@@ -507,7 +507,7 @@
 		console.log(`[SAVE] Percobaan simpan ke-${attempt}`);
 
 		// Klik SIMPAN
-		//(await waitForSelector('#save-tandai-usaha-btn')).click();
+		(await waitForSelector('#save-tandai-usaha-btn')).click();
 
 		try {
 		  const result = await waitForSwalResult(120000);
