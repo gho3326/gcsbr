@@ -424,7 +424,7 @@
 
 	  let text;
 	  if (avgMs >= 1000 * 60) {
-		text = `${(avgMs / 1000).toFixed(0)} menit/IDSBR`;
+		text = `${(avgMs / 1000 * 60).toFixed(0)} menit/IDSBR`;
 	  } else if (avgMs >= 1000 && avgMs < 1000 * 60) {
 		text = `${(avgMs / 1000).toFixed(0)} detik/IDSBR`;
 	  } else {
