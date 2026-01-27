@@ -320,6 +320,7 @@
 		  -->
 		  <div id="gc-stat"></div>
 		  <div id="gc-eta"></div>
+		  <div style="color: #ffcc00;" id="gc-speed">Kecepatan: -</div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
 		  <div style="flex:1; overflow-y:auto; padding:6px; color: #0f0;" id="gc-log"></div>
@@ -413,6 +414,23 @@
 
 		document.getElementById('gc-eta').textContent =
 			`Selesai Jam ${hh}:${mm} · Total: ${totalDurationText}`;
+	}
+
+	function updateSpeed(processed) {
+	  if (processed === 0) return;
+
+	  const elapsedMs = Date.now() - startTime;
+	  const avgMs = elapsedMs / processed;
+
+	  let text;
+	  if (avgMs >= 1000) {
+		text = `${(avgMs / 1000).toFixed(2)} detik / IDSBR`;
+	  } else {
+		text = `${Math.round(avgMs)} ms / IDSBR`;
+	  }
+
+	  const el = document.getElementById('gc-speed');
+	  if (el) el.textContent = `Kecepatan: ${text}`;
 	}
 
   function exportRekapCSV() {
@@ -715,6 +733,7 @@
 		updateProgress(i + 1, rows.length);
 		updateStat();
 		updateETA(i + 1, rows.length);
+		updateSpeed(i + 1);
 
 		await processRow(rows[i], i);
 
@@ -722,6 +741,7 @@
 		updateProgress(i + 1, rows.length);
 		updateStat();
 		updateETA(i + 1, rows.length);
+		updateSpeed(i + 1);
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 		console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
