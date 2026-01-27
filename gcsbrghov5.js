@@ -313,7 +313,7 @@
 		  <h5 style="color: red;"><b>GC SBR 3326 by MasGhoz</b></h5>
 		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses tetap berjalan.</b></div>
 		  <div><b>Pastikan juga koneksi Internet Anda stabil dan VPN Forticlient BPS tetap tersambung.</b></div>
-		  <div style="color: blue;" id="gc-file"></div>
+		  <div style="color: #4CFCFC;" id="gc-file"></div>
 		  <!--
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
@@ -717,6 +717,11 @@
 		updateETA(i + 1, rows.length);
 
 		await processRow(rows[i], i);
+
+		updateDashboard(i + 1);
+		updateProgress(i + 1, rows.length);
+		updateStat();
+		updateETA(i + 1, rows.length);
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 		console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
