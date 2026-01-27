@@ -423,10 +423,12 @@
 	  const avgMs = elapsedMs / processed;
 
 	  let text;
-	  if (avgMs >= 1000) {
-		text = `${(avgMs / 1000).toFixed(2)} detik / IDSBR`;
+	  if (avgMs >= 1000 * 60) {
+		text = `${(avgMs / 1000).toFixed(0)} menit/IDSBR`;
+	  } else if (avgMs >= 1000 && avgMs < 1000 * 60) {
+		text = `${(avgMs / 1000).toFixed(0)} detik/IDSBR`;
 	  } else {
-		text = `${Math.round(avgMs)} ms / IDSBR`;
+		text = `${Math.round(avgMs)} ms/IDSBR`;
 	  }
 
 	  const el = document.getElementById('gc-speed');
