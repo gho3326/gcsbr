@@ -313,7 +313,7 @@
 		  <h5 style="color: red;"><b>GC SBR 3326 by MasGhoz</b></h5>
 		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses tetap berjalan.</b></div>
 		  <div><b>Pastikan juga koneksi Internet Anda stabil dan VPN Forticlient BPS tetap tersambung.</b></div>
-		  <div style="color: lightblue;" id="gc-file"></div>
+		  <div style="color: blue;" id="gc-file"></div>
 		  <!--
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
