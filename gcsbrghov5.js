@@ -707,7 +707,7 @@
 		  //await sleep(300);
 		  input.value = idsbr;
 
-		  //document.querySelector('#apply-filter-btn').click();
+		  document.querySelector('#apply-filter-btn').click();
 
 		  const start = Date.now();
 
