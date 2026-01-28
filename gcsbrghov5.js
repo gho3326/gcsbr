@@ -7,6 +7,7 @@
   let csvFileName = '-';
   let statSuccess = 0;
   let statFailed = 0;
+  let lastPostedPercent = 0;
   let startTime = Date.now();
   
   const LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/insertgc.php';
@@ -375,11 +376,27 @@
 		<span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
 	}
 
-	function updateProgress(processed, total) {//update progress bar
+	async function updateProgress(processed, total) {
 	  const percent = Math.floor((processed / total) * 100);
+
 	  document.getElementById('gc-progress-bar').style.width = percent + '%';
 	  document.getElementById('gc-progress-text').textContent =
 		`Progress: ${processed}/${total} (${percent}%)`;
+
+	  // POST ke server tiap kelipatan 10%, HANYA SEKALI
+	  if (percent >= lastPostedPercent + 10) {
+		lastPostedPercent = percent - (percent % 10);
+
+		try {
+		  await logSelesaiProses({
+			sukses: statSuccess,
+			gagal: statFailed,
+			total: rows.length
+		  });
+		} catch (e) {
+		  console.warn('[GC] Gagal kirim progress:', e.message);
+		}
+	  }
 	}
 
 	function updateETA(processed, total) {//update Estimasi waktu selesai (ETA)
@@ -647,12 +664,33 @@
 	  throw new Error(`Gagal simpan setelah ${maxRetry} percobaan`);
 	}
 
+	function getIDSBRFromResult() {
+	  const rows = document.querySelectorAll(
+		'.usaha-card-details .detail-row'
+	  );
+
+	  for (const row of rows) {
+		const label = row.querySelector('.detail-label');
+		const value = row.querySelector('.detail-value');
+
+		if (
+		  label &&
+		  value &&
+		  label.textContent.trim() === '#IDSBR'
+		) {
+		  return value.textContent.trim();
+		}
+	  }
+
+	  return null;
+	}
+
   /* ===================== cari IDSBR ===================== */
 
 	async function cariIDSBR(idsbr, {
 	  maxRetry = 3,
 	  timeout = 120000,
-	  retryDelay = 30000
+	  retryDelay = 15000
 	} = {}) {
 
 	  console.log(`[SEARCH] Mulai cari IDSBR ${idsbr}`);
@@ -665,25 +703,24 @@
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
 
-		  input.value = '';
-		  await sleep(300);
+		  //input.value = '';
+		  //await sleep(300);
 		  input.value = idsbr;
 
-		  document.querySelector('#apply-filter-btn').click();
+		  //document.querySelector('#apply-filter-btn').click();
 
 		  const start = Date.now();
 
 		  while (Date.now() - start < timeout) {
 
 			/* 1️⃣ Cek hasil IDSBR */
-			const resultEl = document
-			  .querySelector('.usaha-card-details')
-			  ?.querySelector('.detail-row .detail-value');
+			const foundIDSBR = getIDSBRFromResult();
 
-			if (resultEl && resultEl.innerText.trim() === idsbr) {
+			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
 			  return { status: 'FOUND' };
 			}
+
 
 			/* 2️⃣ Cek empty-state */
 			const emptyText = getSearchEmptyState();
@@ -697,7 +734,7 @@
 			  throw new Error('Gagal memuat data');
 			}
 
-			await sleep(300);
+			await sleep(500);
 		  }
 
 		  throw new Error('Timeout menunggu hasil pencarian');
