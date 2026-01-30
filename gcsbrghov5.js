@@ -716,13 +716,19 @@
 		console.log(`[SEARCH] Percobaan ${attempt}/${maxRetry}`);
 
 		try {
+			
+		  document.getElementById('toggle-filter')?.click();
+		  await sleep(1000);
+			
 		  // reset input
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
 
-		  //input.value = '';
-		  //await sleep(300);
+		  input.value = '';
+		  await sleep(1000);
+		  
 		  input.value = idsbr;
+		  await sleep(1000);
 
 		  document.querySelector('#apply-filter-btn').click();
 
@@ -735,6 +741,10 @@
 
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
+			  
+			  document.getElementById('toggle-filter')?.click();
+			  await sleep(1000);
+			  
 			  return { status: 'FOUND' };
 			}
 
