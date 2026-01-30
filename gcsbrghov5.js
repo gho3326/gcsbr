@@ -735,6 +735,7 @@
 			if (btn) {
 			  btn.scrollIntoView({ block: 'center' });
 			  btn.focus();
+			  await sleep(1000);
 			  btn.click();
 			}
 
@@ -744,7 +745,6 @@
 
 			/* 1️⃣ Cek hasil IDSBR */
 			const foundIDSBR = getIDSBRFromResult();
-			await sleep(1000);
 
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
