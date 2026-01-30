@@ -529,6 +529,7 @@
       }
 	  
 	  document.querySelector('.usaha-card-header').click();
+	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
       console.log('[STEP] Klik tombol Tandai');
 	  
