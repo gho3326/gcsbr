@@ -564,6 +564,8 @@
       console.log(`[DELAY] Tunggu ${delay} ms`);
       await sleep(delay);
 
+	  return { status: 'SUCCESS' };
+
     } catch (err) {
       failedAttempt++;
       statFailed++;
@@ -576,9 +578,13 @@
           await sleep(1000);
         }
         failedAttempt = 0;
+		
+		return { status: 'RETRY_SAME_IDSBR' };
       }
 
       await sleep(2000);
+	  return { status: 'RETRY_SAME_IDSBR' };
+	  
     }
   }
   
@@ -667,8 +673,8 @@
 		.find(btn => btn.textContent.trim() === 'Batal');
 
 		if (cancelBtn) {
-		cancelBtn.click();
-		await sleep(500);
+			cancelBtn.click();
+			await sleep(500);
 		}
 
 		throw new Error(`Gagal simpan setelah ${maxRetry} percobaan`);
@@ -778,14 +784,23 @@
 
 	console.log('[LOOP] Mulai processing');
 
-	for (let i = 0; i < rows.length; i++) {
+	let i = 0;
+
+	while (i < rows.length) {
 		updateDashboard(i + 1);
 		updateProgress(i + 1, rows.length);
 		updateStat();
 		updateETA(i + 1, rows.length);
 		updateSpeed(i + 1);
 
-		await processRow(rows[i], i);
+		const result = await processRow(rows[i], i);
+
+		if (result?.status === 'SUCCESS') {
+			i++; // lanjut ke IDSBR berikutnya
+		} else {
+			console.warn(`[LOOP] Retry IDSBR ${rows[i].idsbr}`);
+			// i TIDAK bertambah → retry IDSBR yang sama
+		}
 
 		updateDashboard(i + 1);
 		updateProgress(i + 1, rows.length);
@@ -794,7 +809,7 @@
 		updateSpeed(i + 1);
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
-		console.log(`[LOOP] Delay antar IDSBR ${delay} ms`);
+		console.log(`[LOOP] Delay ${delay} ms`);
 		await sleep(delay);
 	}
 
