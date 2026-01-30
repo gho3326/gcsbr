@@ -730,7 +730,13 @@
 		  input.value = idsbr;
 		  await sleep(1000);
 
-		  document.querySelector('#apply-filter-btn').click();
+		  const btn = document.querySelector('#apply-filter-btn');
+
+			if (btn) {
+			  btn.scrollIntoView({ block: 'center' });
+			  btn.focus();
+			  btn.click();
+			}
 
 		  const start = Date.now();
 
@@ -738,6 +744,7 @@
 
 			/* 1️⃣ Cek hasil IDSBR */
 			const foundIDSBR = getIDSBRFromResult();
+			await sleep(1000);
 
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
