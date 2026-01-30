@@ -661,7 +661,21 @@
 		}
 	  }
 
-	  throw new Error(`Gagal simpan setelah ${maxRetry} percobaan`);
+		if (retryCount >= maxRetry) {
+
+			console.warn('[ERROR] Retry habis, batalkan proses simpan');
+
+			const cancelBtn = Array.from(document.querySelectorAll('button'))
+			.find(btn => btn.textContent.trim() === 'Batal');
+
+			if (cancelBtn) {
+			cancelBtn.click();
+			await sleep(500);
+			}
+
+			throw new Error(`Gagal simpan setelah ${maxRetry} percobaan`);
+		}
+
 	}
 
 	function getIDSBRFromResult() {
