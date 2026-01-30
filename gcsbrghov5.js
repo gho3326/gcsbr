@@ -727,9 +727,15 @@
 
 		try {
 			
-		  document.getElementById('toggle-filter')?.click();
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			
+		  const toggle_filter = document.querySelector('#toggle-filter');
+
+			if (toggle_filter) {
+			  toggle_filter.scrollIntoView({ block: 'center' });
+			  toggle_filter.focus();
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			  toggle_filter.click();
+			}
+
 		  // reset input
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
@@ -740,13 +746,13 @@
 		  input.value = idsbr;
 		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
-		  const btn = document.querySelector('#apply-filter-btn');
+		  const btn_filter = document.querySelector('#apply-filter-btn');
 
-			if (btn) {
-			  btn.scrollIntoView({ block: 'center' });
-			  btn.focus();
+			if (btn_filter) {
+			  btn_filter.scrollIntoView({ block: 'center' });
+			  btn_filter.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			  btn.click();
+			  btn_filter.click();
 			}
 
 		  const start = Date.now();
