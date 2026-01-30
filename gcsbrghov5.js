@@ -15,8 +15,8 @@
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
-  const TOTAL_DELAY_MIN = 1000; // 1 detik
-  const TOTAL_DELAY_MAX = 2000; // 2 detik
+  const TOTAL_DELAY_MIN = 2000; // 2 detik
+  const TOTAL_DELAY_MAX = 4000; // 4 detik
   const COOLDOWN_MS = 3 * 60 * 1000; // 3 menit
   const MAX_FAILED_ATTEMPT = 5;
 
@@ -644,6 +644,8 @@
 		try {
 		  await waitForSelector('.swal2-icon-warning', 2000);
 
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			
 		  console.log('[STEP] Dialog konfirmasi muncul → klik Ya');
 		  (await waitForSelector('.swal2-confirm')).click();
 
@@ -766,8 +768,13 @@
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
 			  
-			  document.getElementById('toggle-filter')?.click();
-			  
+			if (toggle_filter) {
+			  toggle_filter.scrollIntoView({ block: 'center' });
+			  toggle_filter.focus();
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			  toggle_filter.click();
+			}
+
 			  return { status: 'FOUND' };
 			}
 
