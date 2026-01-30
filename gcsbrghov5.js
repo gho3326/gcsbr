@@ -440,8 +440,10 @@
 	  const avgMs = elapsedMs / processed;
 
 	  let text;
-	  if (avgMs >= 1000 * 60) {
-		text = `${(avgMs / 1000 * 60).toFixed(0)} menit/IDSBR`;
+	  if (avgMs >= 1000 * 60 * 60) {
+		text = `${(avgMs / 1000 * 60 * 60).toFixed(2)} jam/IDSBR`;
+	  } else if (avgMs >= 1000 * 60) {
+		text = `${(avgMs / 1000 * 60).toFixed(1)} menit/IDSBR`;
 	  } else if (avgMs >= 1000 && avgMs < 1000 * 60) {
 		text = `${(avgMs / 1000).toFixed(0)} detik/IDSBR`;
 	  } else {
@@ -768,12 +770,12 @@
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
 			  
-			if (toggle_filter) {
-			  toggle_filter.scrollIntoView({ block: 'center' });
-			  toggle_filter.focus();
-			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			  toggle_filter.click();
-			}
+				if (toggle_filter) {
+				  toggle_filter.scrollIntoView({ block: 'center' });
+				  toggle_filter.focus();
+				  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+				  toggle_filter.click();
+				}
 
 			  return { status: 'FOUND' };
 			}
