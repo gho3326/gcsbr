@@ -657,7 +657,7 @@
 			(await waitForSelector('.swal2-confirm')).click();
 
 			// Delay kecil sebelum retry
-			await sleep(1000);
+			await sleep(10000);
 
 			continue; // ulangi loop
 		  }
