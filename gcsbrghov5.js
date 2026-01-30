@@ -508,7 +508,7 @@
 
 		if (searchResult.status === 'NOT_FOUND') {
 		  console.log('[STEP] IDSBR tidak ada → lanjut IDSBR berikutnya');
-		  return;
+		  return { status: 'IDSBR tidak ada' };
 		}
 	  
       var delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
@@ -525,7 +525,7 @@
         console.log('[STEP] Sudah GC / Tidak Aktif → skip & cache');
         gcCache.add(row.idsbr);
         saveGCCache(gcCache);
-        return;
+        return { status: 'Sudah GC' };
       }
 
       console.log('[STEP] Klik tombol Tandai');
@@ -795,12 +795,12 @@
 
 		const result = await processRow(rows[i], i);
 
-		if (result?.status === 'SUCCESS') {
-			i++; // lanjut ke IDSBR berikutnya
-		} else {
+		if (result?.status === 'RETRY_SAME_IDSBR') {
 			console.warn(`[LOOP] Retry IDSBR ${rows[i].idsbr}`);
 			// i TIDAK bertambah → retry IDSBR yang sama
-		}
+		}else{
+			i++; // lanjut ke IDSBR berikutnya
+		} 
 
 		updateDashboard(i + 1);
 		updateProgress(i + 1, rows.length);
