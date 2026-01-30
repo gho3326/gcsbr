@@ -527,9 +527,19 @@
         saveGCCache(gcCache);
         return { status: 'Sudah GC' };
       }
+	  
+	  document.querySelector('.usaha-card-header').click();
 
       console.log('[STEP] Klik tombol Tandai');
-      (await waitForSelector('.btn-tandai')).click();
+	  
+	  const btn_tandai = document.querySelector('.btn-tandai');
+
+		if (btn_tandai) {
+		  btn_tandai.scrollIntoView({ block: 'center' });
+		  btn_tandai.focus();
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+		  btn_tandai.click();
+		}
 
       console.log('[STEP] Isi hasil GC');
       const select = await waitForSelector('#tt_hasil_gc');
@@ -651,7 +661,7 @@
 		  if (result === 'error') {
 			console.warn('[SAVE] Dialog error muncul');
 
-			await sleep(1000);
+			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			
 			// Klik OK error
 			(await waitForSelector('.swal2-confirm')).click();
@@ -718,24 +728,24 @@
 		try {
 			
 		  document.getElementById('toggle-filter')?.click();
-		  await sleep(1000);
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			
 		  // reset input
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
 
 		  input.value = '';
-		  await sleep(1000);
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 		  
 		  input.value = idsbr;
-		  await sleep(1000);
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 		  const btn = document.querySelector('#apply-filter-btn');
 
 			if (btn) {
 			  btn.scrollIntoView({ block: 'center' });
 			  btn.focus();
-			  await sleep(1000);
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn.click();
 			}
 
@@ -750,7 +760,6 @@
 			  console.log('[SEARCH] IDSBR ditemukan');
 			  
 			  document.getElementById('toggle-filter')?.click();
-			  await sleep(1000);
 			  
 			  return { status: 'FOUND' };
 			}
