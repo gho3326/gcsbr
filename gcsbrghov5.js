@@ -134,8 +134,8 @@
 	}
 
 	async function typeLikeHumanNoSearch(input, text, {
-	  minDelay = 200,
-	  maxDelay = 400
+	  minDelay = 500,
+	  maxDelay = 1000
 	} = {}) {
 	  input.focus();
 	  input.value = '';
