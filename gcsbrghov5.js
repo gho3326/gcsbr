@@ -773,6 +773,8 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  toggle_filter.click();
 			}
+			  
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 		  // reset input
 		  const input = document.querySelector('#search-idsbr');
