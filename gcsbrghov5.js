@@ -125,6 +125,14 @@
 	  }
 	}
 
+	function isElementShowing(selector_element_buka_tutup, class_buka) {
+	  const element_buka_tutup   = document.querySelector(selector_element_buka_tutup);
+
+	  if (!element_buka_tutup) return false;
+
+	  return element_buka_tutup.classList.contains(class_buka);
+	}
+
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
@@ -530,7 +538,10 @@
         return { status: 'Sudah GC' };
       }
 	  
-	  document.querySelector('.usaha-card-header').click();
+	  if(!isElementShowing('.usaha-card', 'expanded')){
+		document.querySelector('.usaha-card-header').click();
+	  }
+	  
 	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
       console.log('[STEP] Klik tombol Tandai');
@@ -734,7 +745,7 @@
 			
 		  const toggle_filter = document.querySelector('#toggle-filter');
 
-			if (toggle_filter) {
+			if (toggle_filter && !isElementShowing('#filter-body', 'show')) {//buka filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
 			  toggle_filter.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
@@ -770,7 +781,7 @@
 			if (foundIDSBR === idsbr) {
 			  console.log('[SEARCH] IDSBR ditemukan');
 			  
-				if (toggle_filter) {
+				if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 				  toggle_filter.scrollIntoView({ block: 'center' });
 				  toggle_filter.focus();
 				  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
