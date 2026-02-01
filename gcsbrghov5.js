@@ -133,6 +133,24 @@
 	  return element_buka_tutup.classList.contains(class_buka);
 	}
 
+	async function typeLikeHumanNoSearch(input, text, {
+	  minDelay = 200,
+	  maxDelay = 400
+	} = {}) {
+	  input.focus();
+	  input.value = '';
+
+	  for (const char of String(text)) {
+		input.value += char;
+
+		// ❌ tidak dispatch 'input'
+		// ❌ tidak keydown / keyup
+
+		const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay);
+		await sleep(delay);
+	  }
+	}
+
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
@@ -561,8 +579,6 @@
 
       console.log('[STEP] Isi hasil GC');
       const select = await waitForSelector('#tt_hasil_gc');
-	  select.click();
-	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
       select.value = row.hasil;
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -762,11 +778,7 @@
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
 
-		  input.value = '';
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-		  
-		  input.value = idsbr;
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+		  await typeLikeHumanNoSearch(input, idsbr);
 
 		  const btn_filter = document.querySelector('#apply-filter-btn');
 
