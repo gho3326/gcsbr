@@ -16,7 +16,7 @@
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
   const TOTAL_DELAY_MIN = 2000; // 2 detik
-  const TOTAL_DELAY_MAX = 4000; // 4 detik
+  const TOTAL_DELAY_MAX = 3000; // 3 detik
   const COOLDOWN_MS = 3 * 60 * 1000; // 3 menit
   const MAX_FAILED_ATTEMPT = 5;
 
@@ -514,6 +514,11 @@
 
     try {
 		
+	  if(isElementShowing('.usaha-card', 'expanded')){//tutup usaha-card jika terbuka
+		document.querySelector('.usaha-card-header').click();
+	  }
+	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+	  
       const searchResult = await cariIDSBR(row.idsbr);
 
 		if (searchResult.status === 'NOT_FOUND') {
@@ -538,10 +543,9 @@
         return { status: 'Sudah GC' };
       }
 	  
-	  if(!isElementShowing('.usaha-card', 'expanded')){
+	  if(!isElementShowing('.usaha-card', 'expanded')){//buka usaha-card jika tertutup
 		document.querySelector('.usaha-card-header').click();
 	  }
-	  
 	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
       console.log('[STEP] Klik tombol Tandai');
@@ -557,6 +561,8 @@
 
       console.log('[STEP] Isi hasil GC');
       const select = await waitForSelector('#tt_hasil_gc');
+	  select.click();
+	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
       select.value = row.hasil;
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
