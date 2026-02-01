@@ -139,6 +139,8 @@
 	} = {}) {
 	  input.focus();
 	  input.value = '';
+  
+	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 	  for (const char of String(text)) {
 		input.value += char;
@@ -773,9 +775,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  toggle_filter.click();
 			}
-			  
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-
+			
 		  // reset input
 		  const input = document.querySelector('#search-idsbr');
 		  if (!input) throw new Error('Input IDSBR tidak ditemukan');
