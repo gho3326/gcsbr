@@ -428,6 +428,7 @@
 			  f_latlong.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_latlong.value = "ADA";
+			  f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 	  
@@ -437,6 +438,7 @@
 			  f_gc.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_gc.value = "BELUM";
+			  f_gc.dispatchEvent(new Event('change', { bubbles: true }));
 		  }	  
 		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
