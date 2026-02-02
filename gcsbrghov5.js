@@ -884,15 +884,16 @@
 			console.warn(`[LOOP] Retry IDSBR ${rows[i].idsbr}`);
 			// i TIDAK bertambah → retry IDSBR yang sama
 		}else{
+			
+			updateDashboard(i + 1);
+			updateProgress(i + 1, rows.length);
+			updateStat();
+			updateETA(i + 1, rows.length);
+			updateSpeed(i + 1);
+			updateElapsedTime();
+
 			i++; // lanjut ke IDSBR berikutnya
 		} 
-
-		updateDashboard(i + 1);
-		updateProgress(i + 1, rows.length);
-		updateStat();
-		updateETA(i + 1, rows.length);
-		updateSpeed(i + 1);
-		updateElapsedTime();
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 		console.log(`[LOOP] Delay ${delay} ms`);
