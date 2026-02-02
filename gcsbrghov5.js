@@ -30,17 +30,6 @@
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
   
-	function formatDuration(ms) {
-	  const totalMinutes = Math.ceil(ms / 60000);
-
-	  if (totalMinutes >= 60) {
-		const hours = Math.floor(totalMinutes / 60);
-		const minutes = totalMinutes % 60;
-		return `${hours} jam ${minutes} menit`;
-	  }
-	  return `${totalMinutes} menit`;
-	}
-
 	function getUserInfo() {
 	  const userEl = document.getElementById('dropdown-user');
 	  if (!userEl) {
