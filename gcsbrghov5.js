@@ -153,6 +153,27 @@
 	  }
 	}
 
+	function formatDuration(ms) {
+	  const totalSec = Math.floor(ms / 1000);
+
+	  const h = Math.floor(totalSec / 3600);
+	  const m = Math.floor((totalSec % 3600) / 60);
+	  const s = totalSec % 60;
+
+	  if (h > 0) {
+		return `${h}j ${m}m ${s}d`;
+	  }
+	  return `${m}m ${s}d`;
+	}
+
+	function updateElapsedTime() {
+	  const elapsedMs = Date.now() - startTime;
+	  const el = document.getElementById('gc-elapsed');
+	  if (!el) return;
+
+	  el.textContent = `Durasi: ${formatDuration(elapsedMs)}`;
+	}
+
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
@@ -348,7 +369,8 @@
 		  <div id="gc-current"></div>
 		  -->
 		  <div id="gc-stat"></div>
-		  <div id="gc-eta"></div>
+		  <div id="gc-elapsed" style="color: #ff00ff;">Durasi: 00:00</div>
+		  <div id="gc-eta" style="color: #3366ff;"></div>
 		  <div style="color: #ffcc00;" id="gc-speed">Kecepatan: -</div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
@@ -865,6 +887,7 @@
 		updateStat();
 		updateETA(i + 1, rows.length);
 		updateSpeed(i + 1);
+		updateElapsedTime();
 
 		const result = await processRow(rows[i], i);
 
@@ -880,6 +903,7 @@
 		updateStat();
 		updateETA(i + 1, rows.length);
 		updateSpeed(i + 1);
+		updateElapsedTime();
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 		console.log(`[LOOP] Delay ${delay} ms`);
@@ -895,5 +919,10 @@
 	});
 
 	console.log('[DONE] Semua proses selesai');
+
+	const totalMs = Date.now() - startTime;
+
+	document.getElementById('gc-elapsed').textContent =
+	  `Total durasi: ${formatDuration(totalMs)}`;
 
 })();
