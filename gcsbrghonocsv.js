@@ -420,6 +420,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  toggle_filter.click();
 			}
+			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 		  const f_latlong = document.querySelector('#f_latlong');
 		  if (f_latlong) {//hanya usaha yang sudah ada latitude dan longitudenya
@@ -428,6 +429,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_latlong.value = "ADA";
 		  }
+		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 	  
 		  const f_gc = document.querySelector('#f_gc');
 		  if (f_gc) {//hanya usaha yang belum di gc
@@ -435,8 +437,7 @@
 			  f_gc.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_gc.value = "BELUM";
-		  }
-	  
+		  }	  
 		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 		  const btn_filter = document.querySelector('#apply-filter-btn');
@@ -447,6 +448,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_filter.click();
 			}
+			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -454,6 +456,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  toggle_filter.click();
 			}
+			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 			const card = await cariUsahaValidDenganLoadMore();
 			
