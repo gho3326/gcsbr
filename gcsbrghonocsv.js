@@ -239,7 +239,7 @@
 		`;
 
 	  document.body.appendChild(box);
-	  document.getElementById('gc-download').onclick = exportRekapCSV;
+	  //document.getElementById('gc-download').onclick = exportRekapCSV;
 	}
 
 	function appendDashboardLog(type, args) {
