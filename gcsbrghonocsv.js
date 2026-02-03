@@ -441,17 +441,17 @@
 			  f_gc.dispatchEvent(new Event('change', { bubbles: true }));
 		  }	  
 		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-
+		/*
 		  const btn_filter = document.querySelector('#apply-filter-btn');
 		
-			if (btn_filter) {
+			if (btn_filter) {//klik button filter
 			  btn_filter.scrollIntoView({ block: 'center' });
 			  btn_filter.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_filter.click();
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			
+		*/			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
 			  toggle_filter.focus();
@@ -459,21 +459,29 @@
 			  toggle_filter.click();
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-
-			const card = await cariUsahaValidDenganLoadMore();
+			
+			const card = await cariUsahaValidDenganLoadMore();//usaha-card terpilih
 			
 			if (card) {
 				
 			  card.scrollIntoView({ block: 'center' });
 			  card.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			  card.click();
+			  
+			  const button_expand = card.querySelector('.usaha-card-toggle');
+			  
+			  if (button_expand) {//expand/buka usaha-card terpilih
+				  //button_expand.scrollIntoView({ block: 'center' });
+				  //button_expand.focus();
+				  //await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+				  button_expand.click();
+			  }
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  
 				  
 			  const btn_tandai = card.querySelector('.btn-tandai');
 			  
-				if (btn_tandai) {
+				if (btn_tandai) {//klik tandai di usaha-card terpilih
 				  btn_tandai.scrollIntoView({ block: 'center' });
 				  btn_tandai.focus();
 				  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
