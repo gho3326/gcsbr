@@ -428,9 +428,9 @@
 			  f_latlong.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_latlong.value = "ADA";
-			  f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
+			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+		  //await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 	  
 		  const f_gc = document.querySelector('#f_gc');
 		  if (f_gc) {//hanya usaha yang belum di gc
@@ -438,10 +438,10 @@
 			  f_gc.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_gc.value = "BELUM";
-			  f_gc.dispatchEvent(new Event('change', { bubbles: true }));
+			  //f_gc.dispatchEvent(new Event('change', { bubbles: true }));
 		  }	  
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-		/*
+		  //await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+		
 		  const btn_filter = document.querySelector('#apply-filter-btn');
 		
 			if (btn_filter) {//klik button filter
@@ -451,7 +451,7 @@
 			  btn_filter.click();
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-		*/			
+			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
 			  toggle_filter.focus();
