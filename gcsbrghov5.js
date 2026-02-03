@@ -382,7 +382,12 @@
 		  const namaUser = encodeURIComponent(user.name); // pastikan variabel user sudah ada
 		  const url = `https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/rekap.php?nama=${namaUser}`;
 
-		  window.open(url, '_blank');
+		  window.open(
+			  url,
+			  'gcRekapWindow',
+			  'popup=yes,width=1200,height=750,left=100,top=60,resizable=yes'
+		  );
+
 	  };
 
 	  document.getElementById('gc-download').onclick = exportRekapCSV;
