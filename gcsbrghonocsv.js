@@ -468,17 +468,13 @@
 			  card.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  
-			  const button_expand = card.querySelector('.usaha-card-toggle');
-			  
-			  if (button_expand) {//expand/buka usaha-card terpilih
-				  //button_expand.scrollIntoView({ block: 'center' });
-				  //button_expand.focus();
-				  //await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-				  button_expand.click();
+			  const header = card.querySelector('.usaha-card-header');
+
+			  if (header && !card.classList.contains('expanded')) {
+				  header.click();
+				  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  }
-			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			  
-				  
+  
 			  const btn_tandai = card.querySelector('.btn-tandai');
 			  
 				if (btn_tandai) {//klik tandai di usaha-card terpilih
