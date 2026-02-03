@@ -379,7 +379,7 @@
 	  
 	  document.getElementById('gc-rekap').onclick = () => {
 		  const user = getUserInfo();
-		  const namaUser = encodeURIComponent(user); // pastikan variabel user sudah ada
+		  const namaUser = encodeURIComponent(user.name); // pastikan variabel user sudah ada
 		  const url = `https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/rekap.php?nama=${namaUser}`;
 
 		  window.open(url, '_blank');
