@@ -236,9 +236,24 @@
 		  </div>
 		  <button id="gc-download" style="margin-top:6px;">Download CSV</button>
 		  -->
+		  <button id="gc-rekap" style="margin-top:6px;">Lihat Rekap Anda</button>
 		`;
 
 	  document.body.appendChild(box);
+	  
+	  document.getElementById('gc-rekap').onclick = () => {
+		  const user = getUserInfo();
+		  const namaUser = encodeURIComponent(user.name); // pastikan variabel user sudah ada
+		  const url = `https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/rekap.php?nama=${namaUser}`;
+
+		  window.open(
+			  url,
+			  'gcRekapWindow',
+			  'popup=yes,width=1200,height=750,left=100,top=60,resizable=yes'
+		  );
+
+	  };
+
 	  //document.getElementById('gc-download').onclick = exportRekapCSV;
 	}
 
@@ -757,8 +772,22 @@
 	  }
 
 	  if (result.status === 'SUCCESS') {
-		processed++;
-	  }
+		  processed++;
+
+		  // 🔁 Kirim log setiap 20 IDSBR sukses
+		  if (processed % 20 === 0) {
+			console.log(`[GC] Auto-log progress: ${processed} IDSBR`);
+			try {
+			  await logSelesaiProses({
+				sukses: statSuccess,
+				gagal: statFailed,
+				total: MAX_TOTAL_PROCESS
+			  });
+			} catch (e) {
+			  console.warn('[GC] Gagal kirim progress:', e.message);
+			}
+		  }
+		}
 
 		if (processed >= MAX_TOTAL_PROCESS) {
 		  console.warn('[SAFEGUARD] Maksimum proses tercapai, stop');
