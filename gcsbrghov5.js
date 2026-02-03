@@ -359,7 +359,7 @@
 		  -->
 		  <div id="gc-stat"></div>
 		  <div id="gc-elapsed" style="color: #ff00ff;">Durasi: 00:00</div>
-		  <div id="gc-eta" style="color: #3366ff;"></div>
+		  <div id="gc-eta" style="color: #00ccff;"></div>
 		  <div style="color: #ffcc00;" id="gc-speed">Kecepatan: -</div>
 		  <div id="gc-timer"></div>
 		  <hr style="border:1px solid #333">
@@ -371,10 +371,20 @@
 			  </div>
 			  <div id="gc-progress-text" style="margin-top:4px; color: #0f0;"></div>
 			</div>
+		  <button id="gc-rekap" style="margin-top:6px;">Lihat Rekap Anda</button>
 		  <button id="gc-download" style="margin-top:6px;">Download CSV</button>
 		`;
 
 	  document.body.appendChild(box);
+	  
+	  document.getElementById('gc-rekap').onclick = () => {
+		  const user = getUserInfo();
+		  const namaUser = encodeURIComponent(user); // pastikan variabel user sudah ada
+		  const url = `https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/rekap.php?nama=${namaUser}`;
+
+		  window.open(url, '_blank');
+	  };
+
 	  document.getElementById('gc-download').onclick = exportRekapCSV;
 	}
 
