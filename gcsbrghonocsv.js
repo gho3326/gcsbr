@@ -466,7 +466,11 @@
 			  btn_filter.click();
 			}
 			//await waitForDomSettled();
-			await waitForCardReload();
+			//await waitForCardReload();
+			await Promise.race([
+			  waitForCardReady(),
+			  waitForDomSettled()
+			]);
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -568,38 +572,6 @@
     }
   }
   
-	function waitForDomSettled(idleMs = 600, timeout = 30000) {
-	  return new Promise((resolve, reject) => {
-		let lastChange = Date.now();
-
-		const observer = new MutationObserver(() => {
-		  lastChange = Date.now();
-		});
-
-		observer.observe(document.body, {
-		  childList: true,
-		  subtree: true,
-		  attributes: true
-		});
-
-		const start = Date.now();
-
-		const timer = setInterval(() => {
-		  if (Date.now() - lastChange >= idleMs) {
-			observer.disconnect();
-			clearInterval(timer);
-			resolve(true);
-		  }
-
-		  if (Date.now() - start > timeout) {
-			observer.disconnect();
-			clearInterval(timer);
-			reject(new Error('DOM tidak stabil (timeout)'));
-		  }
-		}, 200);
-	  });
-	}
-
 //----------------- TUNGGU DIALOG SUKSES ATAU GAGAL MUNCUL -----------------------------
 
 	async function waitForSwalResult(timeout = 120000) {
@@ -729,6 +701,37 @@
 	  return null;
 	}
 
+	async function waitForCardReady({
+	  minCards = 1,
+	  stableMs = 400,
+	  timeout = 15000
+	} = {}) {
+	  const start = Date.now();
+	  let lastCount = 0;
+	  let stableSince = null;
+
+	  while (true) {
+		const cards = document.querySelectorAll('.usaha-card').length;
+
+		if (cards >= minCards) {
+		  if (cards !== lastCount) {
+			lastCount = cards;
+			stableSince = Date.now();
+		  }
+
+		  if (Date.now() - stableSince >= stableMs) {
+			return true; // ✔ kartu siap diproses
+		  }
+		}
+
+		if (Date.now() - start > timeout) {
+		  throw new Error('Timeout menunggu usaha-card siap');
+		}
+
+		await sleep(100);
+	  }
+	}
+
 	async function waitForCardReload(timeout = 30000) {
 	  const start = Date.now();
 
@@ -761,6 +764,38 @@
 			resolve(false);
 		  }
 		}, 300);
+	  });
+	}
+
+	function waitForDomSettled(idleMs = 600, timeout = 30000) {
+	  return new Promise((resolve, reject) => {
+		let lastChange = Date.now();
+
+		const observer = new MutationObserver(() => {
+		  lastChange = Date.now();
+		});
+
+		observer.observe(document.body, {
+		  childList: true,
+		  subtree: true,
+		  attributes: true
+		});
+
+		const start = Date.now();
+
+		const timer = setInterval(() => {
+		  if (Date.now() - lastChange >= idleMs) {
+			observer.disconnect();
+			clearInterval(timer);
+			resolve(true);
+		  }
+
+		  if (Date.now() - start > timeout) {
+			observer.disconnect();
+			clearInterval(timer);
+			reject(new Error('DOM tidak stabil (timeout)'));
+		  }
+		}, 200);
 	  });
 	}
 
