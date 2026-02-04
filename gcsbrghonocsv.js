@@ -465,7 +465,7 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_filter.click();
 			}
-			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			await waitForDomSettled();
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -567,6 +567,38 @@
     }
   }
   
+	function waitForDomSettled(idleMs = 600, timeout = 30000) {
+	  return new Promise((resolve, reject) => {
+		let lastChange = Date.now();
+
+		const observer = new MutationObserver(() => {
+		  lastChange = Date.now();
+		});
+
+		observer.observe(document.body, {
+		  childList: true,
+		  subtree: true,
+		  attributes: true
+		});
+
+		const start = Date.now();
+
+		const timer = setInterval(() => {
+		  if (Date.now() - lastChange >= idleMs) {
+			observer.disconnect();
+			clearInterval(timer);
+			resolve(true);
+		  }
+
+		  if (Date.now() - start > timeout) {
+			observer.disconnect();
+			clearInterval(timer);
+			reject(new Error('DOM tidak stabil (timeout)'));
+		  }
+		}, 200);
+	  });
+	}
+
 //----------------- TUNGGU DIALOG SUKSES ATAU GAGAL MUNCUL -----------------------------
 
 	async function waitForSwalResult(timeout = 120000) {
