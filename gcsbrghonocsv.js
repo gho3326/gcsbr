@@ -467,10 +467,11 @@
 			}
 			//await waitForDomSettled();
 			//await waitForCardReload();
-			await Promise.race([
-			  waitForCardReady(),
-			  waitForDomSettled()
-			]);
+			//await Promise.race([
+			//  waitForCardReady(),
+			//  waitForDomSettled()
+			//]);
+			await waitForCardReady();
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
