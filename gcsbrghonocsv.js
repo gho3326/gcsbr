@@ -143,6 +143,28 @@
 
 	  el.textContent = `Durasi: ${formatDuration(elapsedMs)}`;
 	}
+	
+	function promptKodeKecamatan() {
+	  while (true) {
+		const input = prompt('Masukkan 3 digit kode kecamatan (misal: 010):');
+
+		if (input === null) {
+		  throw new Error('Proses dibatalkan oleh user');
+		}
+
+		const kode = input.trim();
+
+		if (/^\d{3}$/.test(kode)) {
+		  return kode;
+		}
+
+		alert('Kode kecamatan harus 3 digit angka!');
+	  }
+	}
+
+	const KODE_KECAMATAN = promptKodeKecamatan();
+	console.log('[INIT] Kode kecamatan:', KODE_KECAMATAN);
+
 
   /* ===================== CACHE ===================== */
 
@@ -436,6 +458,15 @@
 			  toggle_filter.click();
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+
+		  const f_kecamatan = document.querySelector('#f_kecamatan');
+		  if (f_kecamatan) {//hanya usaha yang sudah ada latitude dan longitudenya
+			  f_kecamatan.scrollIntoView({ block: 'center' });
+			  f_kecamatan.focus();
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			  f_kecamatan.value = KODE_KECAMATAN;
+			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
+		  }
 
 		  const f_latlong = document.querySelector('#f_latlong');
 		  if (f_latlong) {//hanya usaha yang sudah ada latitude dan longitudenya
