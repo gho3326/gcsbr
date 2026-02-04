@@ -465,7 +465,8 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_filter.click();
 			}
-			await waitForDomSettled();
+			//await waitForDomSettled();
+			await waitForCardReload();
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -726,6 +727,22 @@
 	  }
 
 	  return null;
+	}
+
+	async function waitForCardReload(timeout = 30000) {
+	  const start = Date.now();
+
+	  // tunggu sampai kosong
+	  while (document.querySelectorAll('.usaha-card').length > 0) {
+		if (Date.now() - start > timeout) return;
+		await sleep(100);
+	  }
+
+	  // tunggu sampai muncul lagi
+	  while (document.querySelectorAll('.usaha-card').length === 0) {
+		if (Date.now() - start > timeout) return;
+		await sleep(100);
+	  }
 	}
 
 	function waitForNewCard(prevCount, timeout = 10000) {
