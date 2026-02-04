@@ -465,13 +465,10 @@
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_filter.click();
 			}
-			//await waitForDomSettled();
-			//await waitForCardReload();
-			//await Promise.race([
-			//  waitForCardReady(),
-			//  waitForDomSettled()
-			//]);
-			await waitForCardReady();
+			await sleep(50);
+
+			// tunggu sampai spinner HILANG
+			await waitForBlockUIFinishMO();
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -702,101 +699,30 @@
 	  return null;
 	}
 
-	async function waitForCardReady({
-	  minCards = 1,
-	  stableMs = 400,
-	  timeout = 15000
-	} = {}) {
-	  const start = Date.now();
-	  let lastCount = 0;
-	  let stableSince = null;
-
-	  while (true) {
-		const cards = document.querySelectorAll('.usaha-card').length;
-
-		if (cards >= minCards) {
-		  if (cards !== lastCount) {
-			lastCount = cards;
-			stableSince = Date.now();
-		  }
-
-		  if (Date.now() - stableSince >= stableMs) {
-			return true; // ✔ kartu siap diproses
-		  }
-		}
-
-		if (Date.now() - start > timeout) {
-		  throw new Error('Timeout menunggu usaha-card siap');
-		}
-
-		await sleep(100);
-	  }
-	}
-
-	async function waitForCardReload(timeout = 30000) {
-	  const start = Date.now();
-
-	  // tunggu sampai kosong
-	  while (document.querySelectorAll('.usaha-card').length > 0) {
-		if (Date.now() - start > timeout) return;
-		await sleep(100);
-	  }
-
-	  // tunggu sampai muncul lagi
-	  while (document.querySelectorAll('.usaha-card').length === 0) {
-		if (Date.now() - start > timeout) return;
-		await sleep(100);
-	  }
-	}
-
-	function waitForNewCard(prevCount, timeout = 10000) {
+	function waitForBlockUIFinishMO(timeout = 30000) {
 	  return new Promise((resolve, reject) => {
 		const start = Date.now();
 
-		const iv = setInterval(() => {
-		  const nowCount = document.querySelectorAll('.usaha-card').length;
-		  if (nowCount > prevCount) {
-			clearInterval(iv);
+		if (!document.querySelector('.blockUI.blockPage')) {
+		  return resolve(true);
+		}
+
+		const observer = new MutationObserver(() => {
+		  if (!document.querySelector('.blockUI.blockPage')) {
+			observer.disconnect();
 			resolve(true);
 		  }
 
 		  if (Date.now() - start > timeout) {
-			clearInterval(iv);
-			resolve(false);
+			observer.disconnect();
+			reject(new Error('Timeout menunggu BlockUI'));
 		  }
-		}, 300);
-	  });
-	}
-
-	function waitForDomSettled(idleMs = 600, timeout = 30000) {
-	  return new Promise((resolve, reject) => {
-		let lastChange = Date.now();
-
-		const observer = new MutationObserver(() => {
-		  lastChange = Date.now();
 		});
 
 		observer.observe(document.body, {
 		  childList: true,
-		  subtree: true,
-		  attributes: true
+		  subtree: true
 		});
-
-		const start = Date.now();
-
-		const timer = setInterval(() => {
-		  if (Date.now() - lastChange >= idleMs) {
-			observer.disconnect();
-			clearInterval(timer);
-			resolve(true);
-		  }
-
-		  if (Date.now() - start > timeout) {
-			observer.disconnect();
-			clearInterval(timer);
-			reject(new Error('DOM tidak stabil (timeout)'));
-		  }
-		}, 200);
 	  });
 	}
 
