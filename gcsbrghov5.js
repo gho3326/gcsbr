@@ -15,8 +15,8 @@
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
 
-  const TOTAL_DELAY_MIN = 2000; // 2 detik
-  const TOTAL_DELAY_MAX = 3000; // 3 detik
+  const TOTAL_DELAY_MIN = 1500; // 1.5 detik
+  const TOTAL_DELAY_MAX = 2200; // 2.2 detik
   const COOLDOWN_MS = 3 * 60 * 1000; // 3 menit
   const MAX_FAILED_ATTEMPT = 5;
 
