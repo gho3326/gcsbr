@@ -562,11 +562,11 @@
 				  const select = await waitForSelector('#tt_hasil_gc');
 				  
 				  const statusCode = getUsahaStatus(card);
-					if (![1, 3].includes(statusCode)) {
-					  throw new Error(`Status usaha tidak valid: ${statusCode}`);
+					if (![1,3,4,99].includes(statusCode)) {
+					  throw new Error('Status tidak dikenal: ' + statusCode);
 					}
 
-					select.value = statusCode;
+					select.value = String(statusCode);
 					select.dispatchEvent(new Event('change', { bubbles: true }));
 
 				  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
@@ -724,16 +724,17 @@
 	}
 
 	function getUsahaStatus(card) {
-	  const text = card
-		.querySelector('.usaha-status')
-		?.textContent
-		?.toLowerCase()
-		.trim() || '';
+	  const el = card.querySelector('.usaha-status');
+	  if (!el) return 99;
 
-	  if (text.includes('aktif')) return 1;
+	  const text = el.textContent.trim().toLowerCase();
+
+	  if (text.includes('duplikat')) return 4;
 	  if (text.includes('tutup')) return 3;
+	  if (text.includes('aktif pindah')) return 1;
+	  if (text.includes('aktif')) return 1;
 
-	  return 0;
+	  return 99;
 	}
 
 	function isDuplikat(card) {
