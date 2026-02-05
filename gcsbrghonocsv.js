@@ -165,7 +165,30 @@
 	const KODE_KECAMATAN = promptKodeKecamatan();
 	console.log('[INIT] Kode kecamatan:', KODE_KECAMATAN);
 
+	function setKecamatanByKode(select, kode) {
+	  const target = [...select.options].find(opt =>
+		opt.textContent.includes(`[${kode}]`)
+	  );
 
+	  if (!target) {
+		console.log('Kode kecamatan tidak ditemukan:', kode);
+		return false;
+	  }
+
+	  select.value = target.value;
+
+	  console.log(
+		'Kecamatan dipilih:',
+		kode,
+		'| value:',
+		target.value,
+		'| text:',
+		target.textContent.trim()
+	  );
+
+	  return true;
+	}
+	
   /* ===================== CACHE ===================== */
 
   function loadGCCache() {
@@ -464,8 +487,8 @@
 			  f_kecamatan.scrollIntoView({ block: 'center' });
 			  f_kecamatan.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			  f_kecamatan.value = KODE_KECAMATAN;
-			  console.log('Kode Kecamatan: ' + f_kecamatan.value);
+			  setKecamatanByKode(f_kecamatan, KODE_KECAMATAN);
+			  console.log('Kode Kec selected: ' + f_kecamatan.value);
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
@@ -714,11 +737,12 @@
 	}
 
 	function isDuplikat(card) {
-	  const status = card.querySelector('.usaha-status');
-	  if (!status) return true;
+	  const text = card.querySelector('.usaha-status')
+		?.textContent
+		?.trim()
+		.toLowerCase();
 
-	  return status.classList.contains('tidak-aktif') &&
-			 status.textContent.trim().toLowerCase() === 'duplikat';
+	  return text === 'duplikat';
 	}
 
 	function getUsahaCardValidPertama() {
@@ -774,6 +798,26 @@
 	  }
 
 	  return null;
+	}
+	
+	function waitForNewCard(prevCount, timeout = 20000) {
+	  return new Promise((resolve, reject) => {
+		const start = Date.now();
+
+		const timer = setInterval(() => {
+		  const nowCount = document.querySelectorAll('.usaha-card').length;
+
+		  if (nowCount > prevCount) {
+			clearInterval(timer);
+			resolve(true);
+		  }
+
+		  if (Date.now() - start > timeout) {
+			clearInterval(timer);
+			reject(new Error('Load more tidak menambah card'));
+		  }
+		}, 150);
+	  });
 	}
 
   /* ===================== POST DATA SAAT MULAI ===================== */
