@@ -234,8 +234,8 @@
 		  <h5 style="color: red;"><b>GC SBR by MasGho</b></h5>
 		  <div><b>Pastikan GC SBR ini tetap terlihat dan layar tetap menyala supaya proses tetap berjalan.</b></div>
 		  <div><b>Pastikan juga koneksi Internet Anda stabil dan VPN Forticlient BPS tetap tersambung.</b></div>
+		  <div style="color: #4CFCFC;" id="gc-kec"></div>
 		  <!--
-		  <div style="color: #4CFCFC;" id="gc-file"></div>
 		  <div id="gc-total"></div>
 		  <div id="gc-current"></div>
 		  -->
@@ -302,12 +302,12 @@
 	}
 
   function updateDashboard(current = 0, timer = '') {
-	  //const fileEl = document.getElementById('gc-file');
+	  const kecEl = document.getElementById('gc-kec');
 	  //const totalEl = document.getElementById('gc-total');
 	  //const currentEl = document.getElementById('gc-current');
 	  const timerEl = document.getElementById('gc-timer');
 
-	  //if (fileEl) fileEl.textContent = `File: ${csvFileName}`;
+	  if (kecEl) kecEl.textContent = `Kecamatan: ${KODE_KECAMATAN}`;
 	  //if (totalEl) totalEl.textContent = `Eligible: ${rows.length}`;
 	  //if (currentEl) currentEl.textContent = `Progress: ${current}/${rows.length}`;
 	  if (timerEl) timerEl.textContent = timer;
@@ -460,11 +460,12 @@
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
 		  const f_kecamatan = document.querySelector('#f_kecamatan');
-		  if (f_kecamatan) {//hanya usaha yang sudah ada latitude dan longitudenya
+		  if (f_kecamatan) {//pilih kecamatan
 			  f_kecamatan.scrollIntoView({ block: 'center' });
 			  f_kecamatan.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  f_kecamatan.value = KODE_KECAMATAN;
+			  console.log('Kode Kecamatan: ' + f_kecamatan.value);
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
