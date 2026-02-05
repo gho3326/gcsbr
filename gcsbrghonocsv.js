@@ -13,6 +13,7 @@
   const MAX_TOTAL_PROCESS = 10000;
   
   const LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/insertgc.php';
+  const ERROR_LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/inserterror.php';
 
   const GC_STORAGE_KEY = 'gcsbr_nocsv_cache';
 
@@ -112,6 +113,30 @@
 
 	  } catch (err) {
 		console.error('[GC] Gagal log selesai:', err);
+	  }
+	}
+	
+	async function logErrorGC({ idsesi, tipe = 'no csv', errormsg = 'unknown error' }) {
+	  try {
+
+		const form = new FormData();
+		form.append('idsesi', idsesi);
+		form.append('tipe', tipe);
+		form.append('errormsg', errormsg.substring(0, 500)); // hindari kepanjangan
+
+		const res = await fetch(ERROR_LOG_URL, {
+		  method: 'POST',
+		  body: form,
+		  credentials: 'include'
+		});
+
+		const json = await res.json().catch(() => null);
+
+		console.log('LOG ERROR SENT:', json);
+
+	  } catch (e) {
+		// jangan sampai error logging bikin script berhenti
+		console.warn('Gagal kirim log error:', e);
 	  }
 	}
 
@@ -464,6 +489,22 @@
 	  };
 	})();
 
+	window.addEventListener('error', e => {
+	  logErrorGC({
+		idsesi: idSesiGC,
+		//tipe: 'WINDOW',
+		errormsg: e.message
+	  });
+	});
+
+	window.addEventListener('unhandledrejection', e => {
+	  logErrorGC({
+		idsesi: idSesiGC,
+		//tipe: 'PROMISE',
+		errormsg: String(e.reason)
+	  });
+	});
+	
   /* ===================== PROCESS ===================== */
 
   let failedAttempt = 0;
@@ -613,6 +654,13 @@
 		  return { status: 'NO_MORE_CARD' };
 		}
 	  
+		// 🔽 LOG ERROR KE SERVER
+		logErrorGC({
+			idsesi: idSesiGC,
+			//tipe: 'PROCESS_USAHA',
+			errormsg: err?.stack || err?.message || String(err)
+		});
+
 		failedAttempt++;
 		statFailed++;
 		console.error(`[ERROR] ${err.message}`);
