@@ -804,7 +804,7 @@
 			(await waitForSelector('.swal2-confirm')).click();
 
 			// Delay kecil sebelum retry
-			await sleep(10000);
+			await sleep(5000);
 
 			console.log('[STEP] Ganti koordinat dengan titik');
 			const latInput = await waitForSelector('#tt_latitude_cek_user');
