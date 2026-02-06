@@ -166,6 +166,13 @@
 		await sleep(delay);
 	  }
 	}
+	
+	function normalizeCoord(val) {
+	  if (val == null) return '';
+	  return String(val)
+		.trim()
+		.replace(',', '.');   // ganti koma → titik
+	}
 
 	function formatDuration(ms) {
 	  const totalSec = Math.floor(ms / 1000);
@@ -675,7 +682,7 @@
       await sleep(delay);
 
 	  console.log('[STEP] Simpan data (dengan retry)');
-	  await saveWithRetry(3);
+	  await saveWithRetry(row, 3);
 
 	  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 	  console.log(`[DELAY] Tunggu sebelum klik OK ${delay} ms`);
@@ -760,7 +767,7 @@
 
 //----------------------- PERCOBAAN KLIK SUBMIT GC ---------------------------
 
-	async function saveWithRetry(maxRetry = 3) {
+	async function saveWithRetry(row, maxRetry = 3) {
 	  for (let attempt = 1; attempt <= maxRetry; attempt++) {
 		console.log(`[SAVE] Percobaan simpan ke-${attempt}`);
 
@@ -798,6 +805,16 @@
 
 			// Delay kecil sebelum retry
 			await sleep(10000);
+
+			console.log('[STEP] Ganti koordinat dengan titik');
+			const latInput = await waitForSelector('#tt_latitude_cek_user');
+			const lngInput = await waitForSelector('#tt_longitude_cek_user');
+
+			latInput.value = normalizeCoord(row.latitude);
+			lngInput.value = normalizeCoord(row.longitude);
+			
+			latInput.dispatchEvent(new Event('input', { bubbles: true }));
+			lngInput.dispatchEvent(new Event('input', { bubbles: true }));
 
 			continue; // ulangi loop
 		  }
