@@ -11,6 +11,7 @@
   let startTime = Date.now();
   
   const LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/insertgc.php';
+  const ERROR_LOG_URL = 'https://debian-resepsionis.tailb8fed0.ts.net/gcsbr/inserterror.php';
 
   const REQUIRED_HEADERS = ['idsbr', 'latitude', 'longitude', 'hasil'];
   const GC_STORAGE_KEY = 'gc_idsbr_cache';
@@ -111,6 +112,30 @@
 
 	  } catch (err) {
 		console.error('[GC] Gagal log selesai:', err);
+	  }
+	}
+
+	async function logErrorGC({ idsesi, tipe = 'csv', errormsg = 'unknown error' }) {
+	  try {
+
+		const form = new FormData();
+		form.append('idsesi', idsesi);
+		form.append('tipe', tipe);
+		form.append('errormsg', errormsg.substring(0, 500)); // hindari kepanjangan
+
+		const res = await fetch(ERROR_LOG_URL, {
+		  method: 'POST',
+		  body: form,
+		  credentials: 'include'
+		});
+
+		const json = await res.json().catch(() => null);
+
+		console.log('LOG ERROR SENT:', json);
+
+	  } catch (e) {
+		// jangan sampai error logging bikin script berhenti
+		console.warn('Gagal kirim log error:', e);
 	  }
 	}
 
@@ -438,8 +463,10 @@
 		`Progress: ${processed}/${total} (${percent}%)`;
 
 	  // POST ke server tiap kelipatan 10%, HANYA SEKALI
-	  if (percent >= lastPostedPercent + 10) {
-		lastPostedPercent = percent - (percent % 10);
+	  const milestone = Math.floor(percent / 10) * 10;
+	  
+	  if (milestone > lastPostedPercent) {
+		lastPostedPercent = milestone;
 
 		try {
 		  await logSelesaiProses({
@@ -551,6 +578,22 @@
 	  };
 	})();
 
+	window.addEventListener('error', e => {
+	  logErrorGC({
+		idsesi: idSesiGC,
+		//tipe: 'WINDOW',
+		errormsg: e.message
+	  });
+	});
+
+	window.addEventListener('unhandledrejection', e => {
+	  logErrorGC({
+		idsesi: idSesiGC,
+		//tipe: 'PROMISE',
+		errormsg: String(e.reason)
+	  });
+	});
+	
   /* ===================== PROCESS ===================== */
 
   let failedAttempt = 0;
@@ -580,13 +623,26 @@
 	  const isSudahGC =
 		  gcBadgeEl &&
 		  gcBadgeEl.textContent &&
-		  gcBadgeEl.textContent.trim() === 'Sudah GC';
+		  gcBadgeEl.textContent.trim().toLowerCase() === 'sudah gc';
 
       if (isSudahGC) {
-        console.log('[STEP] Sudah GC / Tidak Aktif → skip & cache');
+        console.log('[STEP] Sudah GC → skip & cache');
         gcCache.add(row.idsbr);
         saveGCCache(gcCache);
         return { status: 'Sudah GC' };
+      }
+	  
+	  const statusUsahaEl = document.querySelector('.usaha-status');
+	  const isDuplikat =
+		  statusUsahaEl &&
+		  statusUsahaEl.textContent &&
+		  statusUsahaEl.textContent.trim().toLowerCase() === 'duplikat';
+
+      if (isDuplikat) {
+        console.log('[STEP] Status Duplikat → skip & cache');
+        gcCache.add(row.idsbr);
+        saveGCCache(gcCache);
+        return { status: 'Status Duplikat' };
       }
 	  
 	  if(!isElementShowing('.usaha-card', 'expanded')){//buka usaha-card jika tertutup
@@ -641,6 +697,14 @@
 	  return { status: 'SUCCESS' };
 
     } catch (err) {
+		
+		// 🔽 LOG ERROR KE SERVER
+		logErrorGC({
+			idsesi: idSesiGC,
+			//tipe: 'PROCESS_USAHA',
+			errormsg: err?.stack || err?.message || String(err)
+		});
+
       failedAttempt++;
       statFailed++;
 	  console.error(`[ERROR] ${err.message}`);
@@ -886,12 +950,12 @@
 	let i = 0;
 
 	while (i < rows.length) {
-		updateDashboard(i + 1);
-		updateProgress(i + 1, rows.length);
-		updateStat();
-		updateETA(i + 1, rows.length);
-		updateSpeed(i + 1);
-		updateElapsedTime();
+		//updateDashboard(i + 1);
+		//updateProgress(i + 1, rows.length);
+		//updateStat();
+		//updateETA(i + 1, rows.length);
+		//updateSpeed(i + 1);
+		//updateElapsedTime();
 
 		const result = await processRow(rows[i], i);
 
@@ -899,15 +963,15 @@
 			console.warn(`[LOOP] Retry IDSBR ${rows[i].idsbr}`);
 			// i TIDAK bertambah → retry IDSBR yang sama
 		}else{
-			
-			updateDashboard(i + 1);
-			updateProgress(i + 1, rows.length);
-			updateStat();
-			updateETA(i + 1, rows.length);
-			updateSpeed(i + 1);
-			updateElapsedTime();
 
 			i++; // lanjut ke IDSBR berikutnya
+			
+			updateDashboard(i);
+			updateProgress(i, rows.length);
+			updateStat();
+			updateETA(i, rows.length);
+			updateSpeed(i);
+			updateElapsedTime();
 		} 
 
 		const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
