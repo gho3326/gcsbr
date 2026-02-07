@@ -90,13 +90,6 @@
 		console.log('[GC] Session ID:', idSesiGC);
 
 	  } catch (err) {
-
-        if (err && err.message === 'Load more tidak menambah card') {
-          console.warn('[LOOP] Data habis (load more tidak menambah card)');
-          failedAttempt = 0;
-          return { status: 'NO_MORE_CARD' };
-        }
-
 		console.error('[GC] Gagal log mulai:', err);
 	  }
 	}
@@ -219,17 +212,6 @@
 	  );
 
 	  return true;
-	}
-	
-	function getKecamatanInfo() {
-	  const sel = document.querySelector('#f_kecamatan');
-	  if (!sel) return KODE_KECAMATAN;
-
-	  const opt = sel.options[sel.selectedIndex];
-	  if (!opt) return KODE_KECAMATAN;
-
-	  // contoh text: "[010] KANDANGSERANG"
-	  return opt.textContent.trim();
 	}
 	
   /* ===================== CACHE ===================== */
@@ -547,7 +529,7 @@
 			  f_kecamatan.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  setKecamatanByKode(f_kecamatan, KODE_KECAMATAN);
-			  //console.log('Kode Kec selected: ' + f_kecamatan.value);
+			  console.log('Kode Kec selected: ' + f_kecamatan.value);
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
@@ -583,12 +565,6 @@
 
 			// tunggu sampai spinner HILANG
 			await waitForBlockUIFinishMO();
-			
-			// ⛔ cek langsung apakah data kosong
-			if (isUsahaHabis()) {
-			  console.warn('[PAGE] Tidak ada data ditemukan');
-			  return { status: 'NO_MORE_CARD' };
-			}
 			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
@@ -892,14 +868,6 @@
 		}, 150);
 	  });
 	}
-	
-	function isUsahaHabis() {
-	  const empty = document.querySelector('#usaha-cards-container .empty-state');
-	  if (!empty) return false;
-
-	  const text = empty.textContent?.toLowerCase() || '';
-	  return text.includes('tidak ada data');
-	}
 
   /* ===================== POST DATA SAAT MULAI ===================== */
 
@@ -930,12 +898,8 @@
 	  }
 
 	  if (result.status === 'NO_MORE_CARD') {
-		  const kecInfo = getKecamatanInfo();
-
-		  console.log(`[LOOP] Semua usaha valid telah diproses (${kecInfo})`);
-		  appendDashboardLog('warn', [`Selesai kecamatan ${kecInfo}`]);
-
-		  break; // ⛔ STOP LOOP
+		console.log('[LOOP] Semua usaha valid telah diproses');
+		break; // ⛔ STOP LOOP
 	  }
 
 	  if (result.status === 'RETRY_SAME_IDSBR') {
@@ -987,3 +951,104 @@
 	  `Total durasi: ${formatDuration(totalMs)}`;
 
 })();
+
+
+/* ===== GC STABILITY PATCH (INTEGRATED) ===== */
+
+// bot_stability_patch.js
+// Adds: wake lock, stagnation detection, auto refresh recovery
+
+(function(){
+  const CFG = {
+    CARD_SELECTOR: '#usaha-cards-container .usaha-card',
+    EMPTY_SELECTOR: '#usaha-cards-container .empty-state',
+    LOAD_MORE_SELECTOR: 'button, .load-more, [data-testid="load-more"]',
+    MAX_STAGNANT: 3,
+    CHECK_INTERVAL: 4000,
+    STORAGE_KEY: 'gc_last_session'
+  };
+
+  let lastCount = 0;
+  let stagnant = 0;
+  let timer = null;
+  let wakeLock = null;
+
+  async function enableWakeLock(){
+    try{
+      if('wakeLock' in navigator){
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', ()=> console.log('[WAKELOCK] released'));
+        console.log('[WAKELOCK] active');
+      }
+    }catch(e){ console.log('[WAKELOCK] failed', e.message); }
+  }
+
+  function countCards(){
+    return document.querySelectorAll(CFG.CARD_SELECTOR).length;
+  }
+
+  function hasEmpty(){
+    return document.querySelector(CFG.EMPTY_SELECTOR) !== null;
+  }
+
+  function clickLoadMore(){
+    const btn = document.querySelector(CFG.LOAD_MORE_SELECTOR);
+    if(btn){ btn.click(); console.log('[BOT] click load more'); return true; }
+    return false;
+  }
+
+  function saveSession(id){
+    if(id) localStorage.setItem(CFG.STORAGE_KEY, id);
+  }
+
+  function recoverInfo(){
+    return localStorage.getItem(CFG.STORAGE_KEY);
+  }
+
+  function refreshRecover(){
+    console.warn('[RECOVERY] refresh triggered');
+    location.reload();
+  }
+
+  function monitor(){
+    const c = countCards();
+
+    if(hasEmpty()){
+      console.log('[BOT] Semua usaha habis diproses');
+      clearInterval(timer);
+      return;
+    }
+
+    if(c === lastCount){
+      stagnant++;
+      console.log('[MONITOR] stagnant', stagnant, 'count=', c);
+      clickLoadMore();
+
+      if(stagnant >= CFG.MAX_STAGNANT){
+        refreshRecover();
+      }
+    }else{
+      stagnant = 0;
+      lastCount = c;
+      console.log('[MONITOR] progress', c);
+    }
+  }
+
+  window.GCStability = {
+    start(sessionId){
+      saveSession(sessionId);
+      enableWakeLock();
+      lastCount = countCards();
+      timer = setInterval(monitor, CFG.CHECK_INTERVAL);
+      console.log('[GCStability] started, session=', sessionId, 'recover=', recoverInfo());
+    },
+    stop(){
+      if(timer) clearInterval(timer);
+      if(wakeLock) wakeLock.release();
+    }
+  };
+})();
+
+
+// Auto start if idSesiGC exists
+try { if (typeof idSesiGC !== 'undefined') GCStability.start(idSesiGC); } catch(e){}
