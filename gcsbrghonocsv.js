@@ -584,6 +584,12 @@
 			// tunggu sampai spinner HILANG
 			await waitForBlockUIFinishMO();
 			
+			// ⛔ cek langsung apakah data kosong
+			if (isUsahaHabis()) {
+			  console.warn('[PAGE] Tidak ada data ditemukan');
+			  return { status: 'NO_MORE_CARD' };
+			}
+			
 			if (toggle_filter && isElementShowing('#filter-body', 'show')) {//tutup filter cari sbr
 			  toggle_filter.scrollIntoView({ block: 'center' });
 			  toggle_filter.focus();
@@ -885,6 +891,14 @@
 		  }
 		}, 150);
 	  });
+	}
+	
+	function isUsahaHabis() {
+	  const empty = document.querySelector('#usaha-cards-container .empty-state');
+	  if (!empty) return false;
+
+	  const text = empty.textContent?.toLowerCase() || '';
+	  return text.includes('tidak ada data');
 	}
 
   /* ===================== POST DATA SAAT MULAI ===================== */
