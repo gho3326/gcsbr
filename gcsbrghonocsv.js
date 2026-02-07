@@ -547,7 +547,7 @@
 			  f_kecamatan.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  setKecamatanByKode(f_kecamatan, KODE_KECAMATAN);
-			  console.log('Kode Kec selected: ' + f_kecamatan.value);
+			  //console.log('Kode Kec selected: ' + f_kecamatan.value);
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
