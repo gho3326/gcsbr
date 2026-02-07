@@ -90,6 +90,13 @@
 		console.log('[GC] Session ID:', idSesiGC);
 
 	  } catch (err) {
+
+        if (err && err.message === 'Load more tidak menambah card') {
+          console.warn('[LOOP] Data habis (load more tidak menambah card)');
+          failedAttempt = 0;
+          return { status: 'NO_MORE_CARD' };
+        }
+
 		console.error('[GC] Gagal log mulai:', err);
 	  }
 	}
@@ -212,6 +219,17 @@
 	  );
 
 	  return true;
+	}
+	
+	function getKecamatanInfo() {
+	  const sel = document.querySelector('#f_kecamatan');
+	  if (!sel) return KODE_KECAMATAN;
+
+	  const opt = sel.options[sel.selectedIndex];
+	  if (!opt) return KODE_KECAMATAN;
+
+	  // contoh text: "[010] KANDANGSERANG"
+	  return opt.textContent.trim();
 	}
 	
   /* ===================== CACHE ===================== */
@@ -898,8 +916,12 @@
 	  }
 
 	  if (result.status === 'NO_MORE_CARD') {
-		console.log('[LOOP] Semua usaha valid telah diproses');
-		break; // ⛔ STOP LOOP
+		  const kecInfo = getKecamatanInfo();
+
+		  console.log(`[LOOP] Semua usaha valid telah diproses (${kecInfo})`);
+		  appendDashboardLog('warn', [`Selesai kecamatan ${kecInfo}`]);
+
+		  break; // ⛔ STOP LOOP
 	  }
 
 	  if (result.status === 'RETRY_SAME_IDSBR') {
