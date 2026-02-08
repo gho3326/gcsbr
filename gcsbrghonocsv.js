@@ -1,37 +1,49 @@
-
-/* ===== MEDIA KEEP ALIVE (prevent screen sleep) ===== */
+/* ===== REAL AUDIO KEEP ALIVE (WINDOWS PREVENT SLEEP) ===== */
 (function(){
-function startMediaKeepAlive() {
-  if (window.__MEDIA_KEEPALIVE__) return;
 
-  const video = document.createElement('video');
-  video.id = 'bot-keepalive-video';
-  video.autoplay = true;
-  video.loop = true;
-  video.muted = true;
-  video.playsInline = true;
+async function startRealKeepAlive(){
 
-  video.src = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb20yYXZjMQAAAAhmcmVlAAACAG1kYXQhEAUgpAAAAA==";
+  if(window.__REAL_KEEPALIVE__) return;
 
-  video.style.position = 'fixed';
-  video.style.width = '1px';
-  video.style.height = '1px';
-  video.style.opacity = '0.01';
-  video.style.pointerEvents = 'none';
-  video.style.zIndex = '-9999';
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-  document.body.appendChild(video);
-  video.play().catch(()=>{});
-  window.__MEDIA_KEEPALIVE__ = video;
-  console.log('[KEEPALIVE] Media keep alive aktif');
+    // oscillator menghasilkan suara tapi volume 0
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    gain.gain.value = 0.00001; // hampir nol tapi tetap audio stream
+    osc.frequency.value = 220;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+
+    // resume jika disuspend oleh browser
+    setInterval(()=>{
+      if(ctx.state !== 'running'){
+        ctx.resume().catch(()=>{});
+      }
+    },5000);
+
+    window.__REAL_KEEPALIVE__ = ctx;
+
+    console.log('[KEEPALIVE] Real audio stream aktif (anti sleep Windows)');
+
+  }catch(e){
+    console.log('[KEEPALIVE] gagal start audio', e);
+  }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', startMediaKeepAlive, {once:true});
-} else {
-  startMediaKeepAlive();
+if(document.readyState === 'loading'){
+  document.addEventListener('click', startRealKeepAlive, {once:true});
+}else{
+  startRealKeepAlive();
 }
+
 })();
+
 /* ===== END KEEP ALIVE ===== */
 
 (async () => {
