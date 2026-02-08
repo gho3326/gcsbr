@@ -1,61 +1,25 @@
-/* ===== YOUTUBE-LIKE KEEP ALIVE ===== */
-(function () {
+/* ===== REAL MEDIA KEEP ALIVE (YouTube) ===== */
+(function(){
 
-  if (window.__yt_keepalive__) return;
+if (document.getElementById("yt-keepalive")) return;
 
-  const video = document.createElement("video");
-  video.playsInline = true;
-  video.muted = false;
-  video.loop = true;
-  video.autoplay = true;
+const playlistid = "PLnvWI6txkWEmR_mWI7oGdUoNpM04DEdof";
+const iframe = document.createElement("iframe");
+iframe.id = "yt-keepalive";
+iframe.src =
+  "https://www.youtube.com/embed/" + playlistid + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + playlistid + "&modestbranding=1";
+iframe.allow =
+  "autoplay; encrypted-media; picture-in-picture";
+iframe.style.position = "fixed";
+iframe.style.width = "1px";
+iframe.style.height = "1px";
+iframe.style.opacity = "0.01";
+iframe.style.pointerEvents = "none";
+iframe.style.zIndex = "-9999";
 
-  // video hitam 2 detik 30fps (bukan 1 frame!)
-  video.src =
-    "data:video/webm;base64,GkXfo0AgQoaBAULygICAAQAAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9";
+document.body.appendChild(iframe);
 
-  video.style.position = "fixed";
-  video.style.left = "0";
-  video.style.top = "0";
-  video.style.width = "1px";
-  video.style.height = "1px";
-  video.style.opacity = "0.01";
-  video.style.pointerEvents = "none";
-  video.style.zIndex = "999999";
-
-  document.documentElement.appendChild(video);
-
-  // AUDIO CONTEXT (ini yang bikin Windows percaya ini media)
-  const ctx = new AudioContext();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  gain.gain.value = 0.00001; // tidak terdengar
-  osc.frequency.value = 18; // infrasonic
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start();
-
-  async function start() {
-    try {
-      await video.play();
-      await ctx.resume();
-      console.log("[KEEPALIVE] YouTube-mode active");
-    } catch (e) {
-      console.log("[KEEPALIVE] waiting user interaction...");
-    }
-  }
-
-  // YouTube juga butuh user gesture
-  window.addEventListener("click", start, { once: true });
-  start();
-
-  // heartbeat render (GPU compositor activity)
-  setInterval(() => {
-    video.currentTime += 0.000001;
-  }, 1000);
-
-  window.__yt_keepalive__ = true;
+console.log("[KEEPALIVE] YouTube keepalive aktif");
 
 })();
 
