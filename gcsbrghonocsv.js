@@ -1,3 +1,39 @@
+
+/* ===== MEDIA KEEP ALIVE (prevent screen sleep) ===== */
+(function(){
+function startMediaKeepAlive() {
+  if (window.__MEDIA_KEEPALIVE__) return;
+
+  const video = document.createElement('video');
+  video.id = 'bot-keepalive-video';
+  video.autoplay = true;
+  video.loop = true;
+  video.muted = true;
+  video.playsInline = true;
+
+  video.src = "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAAAAGlzb20yYXZjMQAAAAhmcmVlAAACAG1kYXQhEAUgpAAAAA==";
+
+  video.style.position = 'fixed';
+  video.style.width = '1px';
+  video.style.height = '1px';
+  video.style.opacity = '0.01';
+  video.style.pointerEvents = 'none';
+  video.style.zIndex = '-9999';
+
+  document.body.appendChild(video);
+  video.play().catch(()=>{});
+  window.__MEDIA_KEEPALIVE__ = video;
+  console.log('[KEEPALIVE] Media keep alive aktif');
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startMediaKeepAlive, {once:true});
+} else {
+  startMediaKeepAlive();
+}
+})();
+/* ===== END KEEP ALIVE ===== */
+
 (async () => {
 
   /* ===================== KONFIGURASI ===================== */
