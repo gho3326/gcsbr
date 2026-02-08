@@ -1,46 +1,61 @@
-/* ===== REAL AUDIO KEEP ALIVE (WINDOWS PREVENT SLEEP) ===== */
-(function(){
+/* ===== YOUTUBE-LIKE KEEP ALIVE ===== */
+(function () {
 
-async function startRealKeepAlive(){
+  if (window.__yt_keepalive__) return;
 
-  if(window.__REAL_KEEPALIVE__) return;
+  const video = document.createElement("video");
+  video.playsInline = true;
+  video.muted = false;
+  video.loop = true;
+  video.autoplay = true;
 
-  try{
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  // video hitam 2 detik 30fps (bukan 1 frame!)
+  video.src =
+    "data:video/webm;base64,GkXfo0AgQoaBAULygICAAQAAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9AAAB9";
 
-    // oscillator menghasilkan suara tapi volume 0
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
+  video.style.position = "fixed";
+  video.style.left = "0";
+  video.style.top = "0";
+  video.style.width = "1px";
+  video.style.height = "1px";
+  video.style.opacity = "0.01";
+  video.style.pointerEvents = "none";
+  video.style.zIndex = "999999";
 
-    gain.gain.value = 0.00001; // hampir nol tapi tetap audio stream
-    osc.frequency.value = 220;
+  document.documentElement.appendChild(video);
 
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+  // AUDIO CONTEXT (ini yang bikin Windows percaya ini media)
+  const ctx = new AudioContext();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
 
-    osc.start();
+  gain.gain.value = 0.00001; // tidak terdengar
+  osc.frequency.value = 18; // infrasonic
 
-    // resume jika disuspend oleh browser
-    setInterval(()=>{
-      if(ctx.state !== 'running'){
-        ctx.resume().catch(()=>{});
-      }
-    },5000);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
 
-    window.__REAL_KEEPALIVE__ = ctx;
-
-    console.log('[KEEPALIVE] Real audio stream aktif (anti sleep Windows)');
-
-  }catch(e){
-    console.log('[KEEPALIVE] gagal start audio', e);
+  async function start() {
+    try {
+      await video.play();
+      await ctx.resume();
+      console.log("[KEEPALIVE] YouTube-mode active");
+    } catch (e) {
+      console.log("[KEEPALIVE] waiting user interaction...");
+    }
   }
-}
 
-if(document.readyState === 'loading'){
-  document.addEventListener('click', startRealKeepAlive, {once:true});
-}else{
-  startRealKeepAlive();
-}
+  // YouTube juga butuh user gesture
+  window.addEventListener("click", start, { once: true });
+  start();
+
+  // heartbeat render (GPU compositor activity)
+  setInterval(() => {
+    video.currentTime += 0.000001;
+  }, 1000);
+
+  window.__yt_keepalive__ = true;
 
 })();
 
