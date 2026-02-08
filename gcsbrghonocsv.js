@@ -1,25 +1,39 @@
 /* ===== REAL MEDIA KEEP ALIVE (YouTube) ===== */
-(function(){
 
-if (document.getElementById("yt-keepalive")) return;
+(function startYouTubeKeepAlive(){
 
-const videoId = "YBaJlczeduE";
-const iframe = document.createElement("iframe");
-iframe.id = "yt-keepalive";
-iframe.src =
-  "https://www.youtube.com/embed/" + videoId + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + videoId + "&modestbranding=1";
-iframe.allow =
-  "autoplay; encrypted-media; picture-in-picture";
-iframe.style.position = "fixed";
-iframe.style.width = "100px";
-iframe.style.height = "100px";
-// iframe.style.opacity = "0.01";
-// iframe.style.pointerEvents = "none";
-// iframe.style.zIndex = "-9999";
+  if (document.getElementById('yt-keepalive')) return;
 
-document.body.appendChild(iframe);
+  const VIDEO_ID = 'YBaJlczeduE'; // ganti sesuai kebutuhan (video panjang / live ambience)
 
-console.log("[KEEPALIVE] YouTube keepalive aktif");
+  const iframe = document.createElement('iframe');
+  iframe.id = 'yt-keepalive';
+
+  iframe.src =
+    `https://www.youtube.com/embed/${VIDEO_ID}?` +
+    `autoplay=1` +
+    `&mute=0` +            // HARUS ada audio
+    `&controls=0` +
+    `&loop=1` +
+    `&playlist=${VIDEO_ID}` + // trik loop 1 video
+    `&playsinline=1`;
+
+  iframe.allow =
+    'autoplay; encrypted-media; picture-in-picture';
+
+  iframe.style.position = 'fixed';
+  iframe.style.bottom = '0px';
+  iframe.style.right = '0px';
+  iframe.style.width = '10px';
+  iframe.style.height = '10px';
+  iframe.style.opacity = '0.05';
+  iframe.style.pointerEvents = 'none';
+  iframe.style.zIndex = '9999';
+  iframe.style.border = 'none';
+
+  document.body.appendChild(iframe);
+
+  console.log('[KEEPALIVE] YouTube iframe keepalive aktif');
 
 })();
 
