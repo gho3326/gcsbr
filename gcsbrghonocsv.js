@@ -3,11 +3,11 @@
 
 if (document.getElementById("yt-keepalive")) return;
 
-const playlistid = "PLnvWI6txkWEmR_mWI7oGdUoNpM04DEdof";
+const videoId = "YBaJlczeduE";
 const iframe = document.createElement("iframe");
 iframe.id = "yt-keepalive";
 iframe.src =
-  "https://www.youtube.com/embed/" + playlistid + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + playlistid + "&modestbranding=1";
+  "https://www.youtube.com/embed/" + videoId + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + videoId + "&modestbranding=1";
 iframe.allow =
   "autoplay; encrypted-media; picture-in-picture";
 iframe.style.position = "fixed";
