@@ -173,7 +173,7 @@
 		.trim()
 		.replace(',', '.');   // ganti koma → titik
 	}
-
+/*
 	function formatDuration(ms) {
 	  const totalSec = Math.floor(ms / 1000);
 
@@ -185,6 +185,29 @@
 		return `${h}j ${m}m ${s}d`;
 	  }
 	  return `${m}m ${s}d`;
+	}
+*/
+	function formatDuration(ms) {
+	  ms = Math.max(0, Math.floor(ms));
+
+	  const sec  = Math.floor(ms / 1000);
+	  const min  = Math.floor(sec / 60);
+	  const hour = Math.floor(min / 60);
+	  const day  = Math.floor(hour / 24);
+
+	  const s = sec  % 60;
+	  const m = min  % 60;
+	  const h = hour % 24;
+
+	  const parts = [];
+
+	  if (day  > 0) parts.push(`${day} hari`);
+	  if (h    > 0) parts.push(`${h} jam`);
+	  if (m    > 0) parts.push(`${m} menit`);
+	  if (s    > 0 && day === 0) parts.push(`${s} detik`);
+	  // kalau sudah hari, detik tidak penting → biar tidak panjang
+
+	  return parts.join(' ');
 	}
 
 	function updateElapsedTime() {
@@ -554,7 +577,10 @@ rows = rows.filter(r => {
 	  const avgMs = elapsedMs / processed;
 
 	  let text;
-	  if (avgMs >= 1000 * 60 * 60) {
+
+	  if (avgMs >= 1000 * 60 * 60 * 24) {
+		text = `${(avgMs / (1000 * 60 * 60 * 24)).toFixed(2)} hari/IDSBR`;
+	  } else if (avgMs >= 1000 * 60 * 60) {
 		text = `${(avgMs / (1000 * 60 * 60)).toFixed(2)} jam/IDSBR`;
 	  } else if (avgMs >= 1000 * 60) {
 		text = `${(avgMs / (1000 * 60)).toFixed(1)} menit/IDSBR`;
