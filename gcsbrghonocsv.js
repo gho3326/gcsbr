@@ -1,5 +1,5 @@
 /* ===== REAL MEDIA KEEP ALIVE (YouTube) ===== */
-
+/*
 (function startYouTubeKeepAlive(){
 
   if (document.getElementById('yt-keepalive')) return;
@@ -16,7 +16,7 @@
     `&controls=0` +
     `&loop=1` +
     `&playlist=${VIDEO_ID}` + // trik loop 1 video
-    `&playsinline=1`;
+    `&playsinline=1&vq=tiny`;
 
   iframe.allow =
     'autoplay; encrypted-media; picture-in-picture';
@@ -36,6 +36,80 @@
   console.log('[KEEPALIVE] YouTube iframe keepalive aktif');
 
 })();
+*/
+
+let ytPlayer = null;
+
+function startKeepAliveVideo(videoId="YBaJlczeduE") {
+  if (document.getElementById("yt-keepalive")) return;
+
+  const div = document.createElement("div");
+  div.id = "yt-keepalive";
+  div.style.position = "fixed";
+  div.style.width = "10px";
+  div.style.height = "10px";
+  div.style.bottom = "0";
+  div.style.right = "0";
+  div.style.opacity = "0.01";
+  div.style.pointerEvents = "none";
+  document.body.appendChild(div);
+
+  const tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function () {
+    ytPlayer = new YT.Player("yt-keepalive", {
+      height: "10",
+      width: "10",
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        loop: 1,
+        playlist: videoId,
+        playsinline: 1,
+        mute: 0,
+        modestbranding: 1,
+        rel: 0,
+        vq: "tiny"
+      },
+      events: {
+        onReady: e => e.target.playVideo()
+      }
+    });
+  };
+}
+
+async function finishNotification(text) {
+
+  console.log("[BOT] Semua proses selesai");
+
+  // stop youtube keep alive
+  if (ytPlayer && ytPlayer.stopVideo) {
+    ytPlayer.stopVideo();
+    ytPlayer.destroy();
+    ytPlayer = null;
+  }
+
+  await new Promise(r => setTimeout(r, 1200));
+
+  // pilih voice indonesia terbaik
+  let voices = speechSynthesis.getVoices();
+  let indoVoice =
+    voices.find(v => v.lang === "id-ID" && v.name.toLowerCase().includes("google")) ||
+    voices.find(v => v.lang === "id-ID") ||
+    voices[0];
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.voice = indoVoice;
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  utter.volume = 1;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utter);
+}
 
 /* ===== END KEEP ALIVE ===== */
 
@@ -46,6 +120,7 @@
   console.log('[INIT] Script dimulai');
 
   let csvFileName = '-';
+  let NAMA_KECAMATAN = '';
   let statSuccess = 0;
   let statFailed = 0;
   //let lastPostedPercent = 0;
@@ -72,7 +147,11 @@
 	function randomDelay(min, max) {
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
-  
+	
+	function buildFinishSpeech(user, kecamatan, sukses) {
+		return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
+	}
+
 	function getUserInfo() {
 	  const userEl = document.getElementById('dropdown-user');
 	  if (!userEl) {
@@ -255,6 +334,20 @@
 	  return true;
 	}
 	
+	function getNamaKecamatan(selectEl) {
+	  if (!selectEl) return '';
+
+	  const opt = selectEl.options[selectEl.selectedIndex];
+	  if (!opt) return '';
+
+	  const text = opt.textContent || '';
+
+	  // format: [010] KANDANGSERANG
+	  const match = text.match(/\[\d{3}\]\s*(.+)/);
+
+	  return match ? match[1].trim() : text.trim();
+	}
+
   /* ===================== CACHE ===================== */
 
   function loadGCCache() {
@@ -570,7 +663,9 @@
 			  f_kecamatan.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  setKecamatanByKode(f_kecamatan, KODE_KECAMATAN);
-			  console.log('Kode Kec selected: ' + f_kecamatan.value);
+			  NAMA_KECAMATAN = getNamaKecamatan(f_kecamatan);
+			  console.log("Nama kecamatan:", NAMA_KECAMATAN);
+			  //console.log('Kode Kec selected: ' + f_kecamatan.value);
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
@@ -922,6 +1017,8 @@
 	/* ===================== LOOP tiap IDSBR ===================== */
 
 	console.log('[LOOP] Mulai processing');
+	
+	startKeepAliveVideo();//play video youtube supaya layar tetap on
 
 	let processed = 0;
 
@@ -940,6 +1037,15 @@
 
 	  if (result.status === 'NO_MORE_CARD') {
 		console.log('[LOOP] Semua usaha valid telah diproses');
+				
+		const pesan = buildFinishSpeech(
+						user.name,
+						NAMA_KECAMATAN,
+						statSuccess
+					);
+
+		await finishNotification(pesan);
+
 		break; // ⛔ STOP LOOP
 	  }
 
