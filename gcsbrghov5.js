@@ -338,10 +338,10 @@
   const ori_rows = [...rows];
 
   console.log(`[DATA] Total baris CSV: ${rows.length}`);
-
+/*
   rows = rows.filter(r => {
-    if (gcCache.has(r.idsbr)) {
-      console.log(`[FILTER] Skip cache ${r.idsbr}`);
+    if (gcCache.has(r.idsbr) && (r.edit_gc && r.edit_gc !=1 )) {
+      console.log(`[FILTER] Skip cache yang bukan edit ${r.idsbr}`);
       return false;
     }
     if (String(r.gc_label).trim() === '1') {
@@ -354,6 +354,32 @@
     }
     return true;
   });
+*/
+rows = rows.filter(r => {
+
+  const editGC = Number(r.edit_gc) === 1;
+  const hasil  = Number(r.hasil);
+
+  // skip cache kecuali edit ulang
+  if (gcCache.has(r.idsbr) && !editGC) {
+    console.log(`[FILTER] Skip cache yang bukan edit ${r.idsbr}`);
+    return false;
+  }
+
+  // skip label GC
+  if (Number(r.gc_label) === 1) {
+    console.log(`[FILTER] Skip GC label ${r.idsbr}`);
+    return false;
+  }
+
+  // validasi hasil
+  if (!Number.isFinite(hasil) || ![1,3,4,99].includes(hasil)) {
+    console.log(`[FILTER] Skip hasil invalid ${r.idsbr} (${r.hasil})`);
+    return false;
+  }
+
+  return true;
+});
 
   console.log(`[DATA] Eligible IDSBR: ${rows.length}`);
 
