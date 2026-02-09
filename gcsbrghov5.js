@@ -626,19 +626,6 @@
       console.log(`[DELAY] Tunggu sebelum klik Tandai ${delay} ms`);
       await sleep(delay);
 
-	  const gcBadgeEl = document.querySelector('.gc-badge');
-	  const isSudahGC =
-		  gcBadgeEl &&
-		  gcBadgeEl.textContent &&
-		  gcBadgeEl.textContent.trim().toLowerCase() === 'sudah gc';
-
-      if (isSudahGC) {
-        console.log('[STEP] Sudah GC → skip & cache');
-        gcCache.add(row.idsbr);
-        saveGCCache(gcCache);
-        return { status: 'Sudah GC' };
-      }
-	  
 	  const statusUsahaEl = document.querySelector('.usaha-status');
 	  const isDuplikat =
 		  statusUsahaEl &&
@@ -657,25 +644,67 @@
 	  }
 	  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 
-      console.log('[STEP] Klik tombol Tandai');
-	  
-	  const btn_tandai = document.querySelector('.btn-tandai');
+	  const gcBadgeEl = document.querySelector('.gc-badge');
+	  const isSudahGC =
+		  gcBadgeEl &&
+		  gcBadgeEl.textContent &&
+		  gcBadgeEl.textContent.trim().toLowerCase() === 'sudah gc';
 
-		if (btn_tandai) {
-		  btn_tandai.scrollIntoView({ block: 'center' });
-		  btn_tandai.focus();
-		  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-		  btn_tandai.click();
-		}
+      if (isSudahGC && row.edit_gc != 1) {//jika sudah gc dan tidak mau edit lagi
+        
+			console.log('[STEP] Sudah GC → skip & cache');
+			gcCache.add(row.idsbr);
+			saveGCCache(gcCache);
+			return { status: 'Sudah GC' };
+		
+      }else if(isSudahGC && row.edit_gc == 1){//jika sudah gc tapi mau diedit lagi
+			console.log('[STEP] Klik Edit GC');
+			const btn_edit_gc = document.querySelector('.btn-gc-edit');
+
+			if (btn_edit_gc) {// ada tombol edit GC
+				btn_edit_gc.scrollIntoView({ block: 'center' });
+				btn_edit_gc.focus();
+				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+				btn_edit_gc.click();
+			}else{// tidak ada tombol edit gc, mungkin beda username
+				console.log('[STEP] Tidak bisa edit GC → skip');
+				return { status: 'Sudah GC' };
+			}
+	  }else if(!isSudahGC){// jika belum gc
+		  console.log('[STEP] Klik tombol Tandai');
+		  const btn_tandai = document.querySelector('.btn-tandai');
+
+			if (btn_tandai) {
+			  btn_tandai.scrollIntoView({ block: 'center' });
+			  btn_tandai.focus();
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			  btn_tandai.click();
+			}
+	  }
 
       console.log('[STEP] Isi hasil GC');
       const select = await waitForSelector('#tt_hasil_gc');
+	  
+		if (![...select.options].some(o => o.value === row.hasil)) {
+			throw new Error(`Nilai hasil GC tidak valid: ${row.hasil}`);
+		}
+		
       select.value = row.hasil;
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
       console.log('[STEP] Isi koordinat');
       (await waitForSelector('#tt_latitude_cek_user')).value = row.latitude;
       (await waitForSelector('#tt_longitude_cek_user')).value = row.longitude;
+
+		if (row.edit_nama && row.edit_nama.trim()!=''){//jika kolom edit_nama ada isinya
+		  (await waitForSelector('#toggle_edit_nama')).checked = true;
+		  (await waitForSelector('#tt_nama_usaha_gc')).value = row.edit_nama;
+		}
+
+		if (row.edit_alamat && row.edit_alamat.trim()!=''){// jika kolom edit_alamat ada isinya
+		  (await waitForSelector('#toggle_edit_alamat')).checked = true;
+		  (await waitForSelector('#tt_alamat_usaha_gc')).value = row.edit_alamat;
+		}
 
       delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
       console.log(`[DELAY] Tunggu sebelum klik SIMPAN ${delay} ms`);
