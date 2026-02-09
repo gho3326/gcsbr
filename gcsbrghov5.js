@@ -650,14 +650,14 @@
 		  gcBadgeEl.textContent &&
 		  gcBadgeEl.textContent.trim().toLowerCase() === 'sudah gc';
 
-      if (isSudahGC && row.edit_gc != 1) {//jika sudah gc dan tidak mau edit lagi
+      if (isSudahGC && row.edit_gc && row.edit_gc != 1) {//jika sudah gc dan tidak mau edit lagi
         
 			console.log('[STEP] Sudah GC → skip & cache');
 			gcCache.add(row.idsbr);
 			saveGCCache(gcCache);
 			return { status: 'Sudah GC' };
 		
-      }else if(isSudahGC && row.edit_gc == 1){//jika sudah gc tapi mau diedit lagi
+      }else if(isSudahGC && row.edit_gc && row.edit_gc == 1){//jika sudah gc tapi mau diedit lagi
 			console.log('[STEP] Klik Edit GC');
 			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
