@@ -744,12 +744,12 @@ rows = rows.filter(r => {
 		
       }else if(isSudahGC && row.edit_gc && row.edit_gc == 1){//jika sudah gc tapi mau diedit lagi
 			console.log('[STEP] Klik Edit GC');
-			const btn_edit_gc = await waitClickable('.btn-gc-edit');
+			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
+			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.scrollIntoView({ block: 'center' });
 				btn_edit_gc.focus();
 				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.click();
 			}else{// tidak ada tombol edit gc, mungkin beda username
 				console.log('[STEP] Tidak bisa edit GC → skip');
@@ -757,22 +757,22 @@ rows = rows.filter(r => {
 			}
 	  }else if(!isSudahGC){// jika belum gc
 		  console.log('[STEP] Klik tombol Tandai');
-		  const btn_tandai = await waitClickable('.btn-tandai');
+		  const btn_tandai = document.querySelector('.btn-tandai');
 
+			if (btn_tandai) {// jika ada tombol tandai dan bisa diklik
 			  btn_tandai.scrollIntoView({ block: 'center' });
 			  btn_tandai.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			if (btn_tandai) {// jika ada tombol tandai dan bisa diklik
 			  btn_tandai.click();
 			}
 	  }else if(isSudahGC && (String(row.edit_gc).trim() === '' || row.edit_gc == null)){
 			console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
-			const btn_edit_gc = await waitClickable('.btn-gc-edit');
+			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
+			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.scrollIntoView({ block: 'center' });
 				btn_edit_gc.focus();
 				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.click();
 			}else{// tidak ada tombol edit gc, mungkin beda username
 				console.log('[STEP] Tidak bisa edit GC → skip');
