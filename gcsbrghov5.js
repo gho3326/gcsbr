@@ -390,7 +390,7 @@ rows = rows.filter(r => {
   }
 
   // skip label GC
-  if (Number(r.gc_label) === 1) {
+  if (Number(r.gc_label) === 1 && !editGC) {
     console.log(`[FILTER] Skip GC label ${r.idsbr}`);
     return false;
   }
