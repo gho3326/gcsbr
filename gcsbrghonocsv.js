@@ -40,7 +40,7 @@
 
 let ytPlayer = null;
 
-function startKeepAliveVideo(videoId="YBaJlczeduE") {
+function startKeepAliveVideo(videoId="35Ok821_MxE") {
   if (document.getElementById("yt-keepalive")) return;
 
   const div = document.createElement("div");
@@ -1037,15 +1037,7 @@ async function finishNotification(text) {
 
 	  if (result.status === 'NO_MORE_CARD') {
 		console.log('[LOOP] Semua usaha valid telah diproses');
-				
-		const pesan = buildFinishSpeech(
-						user.name,
-						NAMA_KECAMATAN,
-						statSuccess
-					);
-
-		await finishNotification(pesan);
-
+			
 		break; // ⛔ STOP LOOP
 	  }
 
@@ -1096,6 +1088,14 @@ async function finishNotification(text) {
 
 	document.getElementById('gc-elapsed').textContent =
 	  `Total durasi: ${formatDuration(totalMs)}`;
+	
+	const pesan = buildFinishSpeech(
+					user.name,
+					NAMA_KECAMATAN,
+					statSuccess
+				);
+
+	await finishNotification(pesan);
 
 })();
 
