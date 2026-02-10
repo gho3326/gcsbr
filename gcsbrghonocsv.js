@@ -49,38 +49,6 @@ function stopKeepAliveVideo() {
   iframe.src = "about:blank";
 }
 
-function buildFinishSpeech(user, kecamatan, sukses) {
-	return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
-}
-
-let BOT_TERMINATED = false;
-
-async function terminateBot(reason, isError=false) {
-  if (BOT_TERMINATED) return;
-  BOT_TERMINATED = true;
-
-  console.warn('[BOT TERMINATE]', reason);
-
-  try { stopKeepAliveVideo(); } catch {}
-
-  try {
-    const pesan = buildFinishSpeech(
-      user?.name || 'User',
-      NAMA_KECAMATAN || '-',
-      statSuccess || 0
-    );
-
-    await finishNotification(pesan);
-
-  } catch(e) {
-    console.warn('TTS gagal:', e);
-  }
-
-  await sleep(1200);
-
-  if (isError) throw new Error(reason);
-}
-
 async function finishNotification(text) {
 
   console.log("[BOT] Semua proses selesai");
@@ -148,6 +116,38 @@ async function finishNotification(text) {
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 	
+	function buildFinishSpeech(user, kecamatan, sukses) {
+		return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
+	}
+
+	let BOT_TERMINATED = false;
+
+	async function terminateBot(reason, isError=false) {
+	  if (BOT_TERMINATED) return;
+	  BOT_TERMINATED = true;
+
+	  console.warn('[BOT TERMINATE]', reason);
+
+	  try { stopKeepAliveVideo(); } catch {}
+
+	  try {
+		const pesan = buildFinishSpeech(
+		  user?.name || 'User',
+		  NAMA_KECAMATAN || '-',
+		  statSuccess || 0
+		);
+
+		await finishNotification(pesan);
+
+	  } catch(e) {
+		console.warn('TTS gagal:', e);
+	  }
+
+	  await sleep(1200);
+
+	  if (isError) throw new Error(reason);
+	}
+
 	function getUserInfo() {
 	  const userEl = document.getElementById('dropdown-user');
 	  if (!userEl) {
