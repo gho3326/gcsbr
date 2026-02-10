@@ -233,6 +233,16 @@
 
 	  return true;
 	}
+	
+	async function waitClickable(selector, timeout=10000) {
+	  const start = Date.now();
+	  while (Date.now() - start < timeout) {
+		const el = document.querySelector(selector);
+		if (isClickable(el)) return el;
+		await sleep(200);
+	  }
+	  throw new Error(`Timeout menunggu clickable: ${selector}`);
+	}
 
   /* ===================== CSV ===================== */
 
@@ -734,9 +744,9 @@ rows = rows.filter(r => {
 		
       }else if(isSudahGC && row.edit_gc && row.edit_gc == 1){//jika sudah gc tapi mau diedit lagi
 			console.log('[STEP] Klik Edit GC');
-			const btn_edit_gc = document.querySelector('.btn-gc-edit');
+			const btn_edit_gc = await waitClickable('.btn-gc-edit');
 
-			if (isClickable(btn_edit_gc)) {// ada tombol edit GC
+			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.scrollIntoView({ block: 'center' });
 				btn_edit_gc.focus();
 				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
@@ -747,9 +757,9 @@ rows = rows.filter(r => {
 			}
 	  }else if(!isSudahGC){// jika belum gc
 		  console.log('[STEP] Klik tombol Tandai');
-		  const btn_tandai = document.querySelector('.btn-tandai');
+		  const btn_tandai = await waitClickable('.btn-tandai');
 
-			if (isClickable(btn_tandai)) {// jika ada tombol tandai dan bisa diklik
+			if (btn_tandai) {// jika ada tombol tandai dan bisa diklik
 			  btn_tandai.scrollIntoView({ block: 'center' });
 			  btn_tandai.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
@@ -757,9 +767,9 @@ rows = rows.filter(r => {
 			}
 	  }else if(isSudahGC && (String(row.edit_gc).trim() === '' || row.edit_gc == null)){
 			console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
-			const btn_edit_gc = document.querySelector('.btn-gc-edit');
+			const btn_edit_gc = await waitClickable('.btn-gc-edit');
 
-			if (isClickable(btn_edit_gc)) {// ada tombol edit GC
+			if (btn_edit_gc) {// ada tombol edit GC
 				btn_edit_gc.scrollIntoView({ block: 'center' });
 				btn_edit_gc.focus();
 				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
