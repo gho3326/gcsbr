@@ -49,6 +49,10 @@ function stopKeepAliveVideo() {
   iframe.src = "about:blank";
 }
 
+function buildFinishSpeech(user, kecamatan, sukses) {
+	return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
+}
+
 let BOT_TERMINATED = false;
 
 async function terminateBot(reason, isError=false) {
@@ -144,10 +148,6 @@ async function finishNotification(text) {
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 	
-	function buildFinishSpeech(user, kecamatan, sukses) {
-		return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
-	}
-
 	function getUserInfo() {
 	  const userEl = document.getElementById('dropdown-user');
 	  if (!userEl) {
