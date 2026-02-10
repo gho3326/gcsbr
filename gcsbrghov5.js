@@ -754,19 +754,19 @@ rows = rows.filter(r => {
 			  btn_tandai.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_tandai.click();
-			}else{
-				console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
-				const btn_edit_gc = document.querySelector('.btn-gc-edit');
+			}
+	  }else if(isSudahGC && && row.edit_gc && (row.edit_gc == "" || row.edit_gc == null)){
+			console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
+			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
-				if (isClickable(btn_edit_gc)) {// ada tombol edit GC
-					btn_edit_gc.scrollIntoView({ block: 'center' });
-					btn_edit_gc.focus();
-					await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
-					btn_edit_gc.click();
-				}else{// tidak ada tombol edit gc, mungkin beda username
-					console.log('[STEP] Tidak bisa edit GC → skip');
-					return { status: 'Sudah GC' };
-				}
+			if (isClickable(btn_edit_gc)) {// ada tombol edit GC
+				btn_edit_gc.scrollIntoView({ block: 'center' });
+				btn_edit_gc.focus();
+				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+				btn_edit_gc.click();
+			}else{// tidak ada tombol edit gc, mungkin beda username
+				console.log('[STEP] Tidak bisa edit GC → skip');
+				return { status: 'Sudah GC' };
 			}
 	  }
 
