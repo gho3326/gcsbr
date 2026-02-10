@@ -394,6 +394,11 @@ rows = rows.filter(r => {
     console.log(`[FILTER] Skip GC label ${r.idsbr}`);
     return false;
   }
+  
+	if (Number(r.edited) === 1) {
+	  console.log(`[FILTER] Skip sudah pernah edit ${r.idsbr}`);
+	  return false;
+	}
 
   // validasi hasil
   if (!Number.isFinite(hasil) || ![1,3,4,99].includes(hasil)) {
@@ -773,8 +778,15 @@ rows = rows.filter(r => {
 	  (await waitForSelector('.swal2-confirm', 60000)).click();
 
       console.log('[SUCCESS] IDSBR berhasil');
-      gcCache.add(row.idsbr);
+      
+	  gcCache.add(row.idsbr);
       saveGCCache(gcCache);
+	  
+	  if(isSudahGC && row.edit_gc && row.edit_gc == 1){
+			row.edited = 1;
+			console.log(`[SUCCESS] IDSBR ${row.idsbr} edited`);
+	  }
+	  
       failedAttempt = 0;
 	  statSuccess++;
 
