@@ -755,7 +755,7 @@ rows = rows.filter(r => {
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_tandai.click();
 			}
-	  }else if(isSudahGC && && row.edit_gc && (row.edit_gc == "" || row.edit_gc == null)){
+	  }else if(isSudahGC && row.edit_gc && (row.edit_gc == "" || row.edit_gc == null)){
 			console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
 			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
