@@ -723,6 +723,8 @@ rows = rows.filter(r => {
 		  gcBadgeEl.textContent &&
 		  gcBadgeEl.textContent.trim().toLowerCase() === 'sudah gc';
 
+	  console.log('Sudah GC: ' + isSudahGC +', edit GC: ' + row.edit_gc);
+			
       if (isSudahGC && row.edit_gc && row.edit_gc != 1) {//jika sudah gc dan tidak mau edit lagi
         
 			console.log('[STEP] Sudah GC → skip & cache');
