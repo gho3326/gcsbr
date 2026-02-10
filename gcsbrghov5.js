@@ -173,20 +173,7 @@
 		.trim()
 		.replace(',', '.');   // ganti koma → titik
 	}
-/*
-	function formatDuration(ms) {
-	  const totalSec = Math.floor(ms / 1000);
 
-	  const h = Math.floor(totalSec / 3600);
-	  const m = Math.floor((totalSec % 3600) / 60);
-	  const s = totalSec % 60;
-
-	  if (h > 0) {
-		return `${h}j ${m}m ${s}d`;
-	  }
-	  return `${m}m ${s}d`;
-	}
-*/
 	function formatDuration(ms) {
 	  ms = Math.max(0, Math.floor(ms));
 
@@ -216,6 +203,35 @@
 	  if (!el) return;
 
 	  el.textContent = `Durasi: ${formatDuration(elapsedMs)}`;
+	}
+	
+	function isClickable(el) {
+	  if (!el) return false;
+
+	  const style = window.getComputedStyle(el);
+
+	  if (
+		style.display === 'none' ||
+		style.visibility === 'hidden' ||
+		style.opacity === '0' ||
+		style.pointerEvents === 'none'
+	  ) return false;
+
+	  if (el.disabled) return false;
+
+	  const rect = el.getBoundingClientRect();
+
+	  if (rect.width === 0 || rect.height === 0) return false;
+
+	  // cek ketutup element lain
+	  const centerX = rect.left + rect.width / 2;
+	  const centerY = rect.top + rect.height / 2;
+
+	  const topEl = document.elementFromPoint(centerX, centerY);
+
+	  if (!topEl || (!el.contains(topEl) && topEl !== el)) return false;
+
+	  return true;
 	}
 
   /* ===================== CSV ===================== */
@@ -718,7 +734,7 @@ rows = rows.filter(r => {
 			console.log('[STEP] Klik Edit GC');
 			const btn_edit_gc = document.querySelector('.btn-gc-edit');
 
-			if (btn_edit_gc) {// ada tombol edit GC
+			if (isClickable(btn_edit_gc)) {// ada tombol edit GC
 				btn_edit_gc.scrollIntoView({ block: 'center' });
 				btn_edit_gc.focus();
 				await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
@@ -731,11 +747,24 @@ rows = rows.filter(r => {
 		  console.log('[STEP] Klik tombol Tandai');
 		  const btn_tandai = document.querySelector('.btn-tandai');
 
-			if (btn_tandai) {
+			if (isClickable(btn_tandai)) {// jika ada tombol tandai dan bisa diklik
 			  btn_tandai.scrollIntoView({ block: 'center' });
 			  btn_tandai.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_tandai.click();
+			}else{
+				console.log('[STEP] Usaha sudah diGC, mencoba klik edit');
+				const btn_edit_gc = document.querySelector('.btn-gc-edit');
+
+				if (isClickable(btn_edit_gc)) {// ada tombol edit GC
+					btn_edit_gc.scrollIntoView({ block: 'center' });
+					btn_edit_gc.focus();
+					await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+					btn_edit_gc.click();
+				}else{// tidak ada tombol edit gc, mungkin beda username
+					console.log('[STEP] Tidak bisa edit GC → skip');
+					return { status: 'Sudah GC' };
+				}
 			}
 	  }
 
