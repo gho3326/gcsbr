@@ -205,6 +205,77 @@
 	  el.textContent = `Durasi: ${formatDuration(elapsedMs)}`;
 	}
 	
+	let ttsUnlocked = false;
+
+	async function speakSelesaiGC(namaUser, jumlahSukses, durasiText) {
+
+		if (!ttsUnlocked) {
+			console.warn('[TTS] Belum ada interaksi user → tidak bisa bunyi');
+			return;
+		}
+		
+	  const text =
+		`Kepada saudara ${namaUser}, proses ground cek anda telah selesai, ` +
+		`dengan ${jumlahSukses} usaha yang berhasil di ground cek, ` +
+		`dengan total durasi selama ${durasiText}`;
+
+	  // tunggu voice siap (penting di Chrome)
+	  const voices = await new Promise(resolve => {
+		let v = speechSynthesis.getVoices();
+		if (v.length) return resolve(v);
+		speechSynthesis.onvoiceschanged = () => resolve(speechSynthesis.getVoices());
+	  });
+
+	  // cari voice Indonesia
+	  let voice =
+		voices.find(v => v.lang === 'id-ID') ||
+		voices.find(v => v.lang.startsWith('id')) ||
+		voices[0];
+
+	  const utter = new SpeechSynthesisUtterance(text);
+	  utter.voice = voice;
+	  utter.rate = 0.95;   // agak natural
+	  utter.pitch = 1;
+	  utter.volume = 1;
+
+	  speechSynthesis.cancel(); // stop suara lama
+	  speechSynthesis.speak(utter);
+	}
+	
+	function unlockTTSOnce() {
+	  if (ttsUnlocked) return;
+
+	  try {
+		const u = new SpeechSynthesisUtterance('');
+		u.volume = 0;
+		speechSynthesis.speak(u);
+		speechSynthesis.cancel();
+
+		ttsUnlocked = true;
+		console.log('[TTS] Audio unlocked');
+
+		removeTTSListeners();
+	  } catch (e) {}
+	}
+
+	function removeTTSListeners() {
+	  const events = [
+		'pointerdown','mousedown','mouseup','click','dblclick','contextmenu',
+		'keydown','keyup','touchstart','touchend'
+	  ];
+	  events.forEach(ev => window.removeEventListener(ev, unlockTTSOnce, true));
+	}
+
+	function installTTSUnlocker() {
+	  const events = [
+		'pointerdown','mousedown','mouseup','click','dblclick','contextmenu',
+		'keydown','keyup','touchstart','touchend'
+	  ];
+	  events.forEach(ev => window.addEventListener(ev, unlockTTSOnce, true));
+	}
+
+	installTTSUnlocker();
+	
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
@@ -1105,5 +1176,13 @@ rows = rows.filter(r => {
 
 	document.getElementById('gc-elapsed').textContent =
 	  `Total durasi: ${formatDuration(totalMs)}`;
+	  
+	// semua selesai
+	const namaUser = user.name;
+	const jumlahSukses = statSuccess;
+	const durasi = formatDuration(Date.now() - startTime);
+
+	await speakSelesaiGC(namaUser, jumlahSukses, durasi);
+
 
 })();
