@@ -205,45 +205,6 @@
 	  el.textContent = `Durasi: ${formatDuration(elapsedMs)}`;
 	}
 	
-	function isClickable(el) {
-	  if (!el) return false;
-
-	  const style = window.getComputedStyle(el);
-
-	  if (
-		style.display === 'none' ||
-		style.visibility === 'hidden' ||
-		style.opacity === '0' ||
-		style.pointerEvents === 'none'
-	  ) return false;
-
-	  if (el.disabled) return false;
-
-	  const rect = el.getBoundingClientRect();
-
-	  if (rect.width === 0 || rect.height === 0) return false;
-
-	  // cek ketutup element lain
-	  const centerX = rect.left + rect.width / 2;
-	  const centerY = rect.top + rect.height / 2;
-
-	  const topEl = document.elementFromPoint(centerX, centerY);
-
-	  if (!topEl || (!el.contains(topEl) && topEl !== el)) return false;
-
-	  return true;
-	}
-	
-	async function waitClickable(selector, timeout=10000) {
-	  const start = Date.now();
-	  while (Date.now() - start < timeout) {
-		const el = document.querySelector(selector);
-		if (isClickable(el)) return el;
-		await sleep(200);
-	  }
-	  throw new Error(`Timeout menunggu clickable: ${selector}`);
-	}
-
   /* ===================== CSV ===================== */
 
   console.log('[CSV] Menunggu file CSV dipilih');
