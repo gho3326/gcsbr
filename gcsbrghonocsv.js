@@ -1,42 +1,4 @@
 /* ===== REAL MEDIA KEEP ALIVE (YouTube) ===== */
-/*
-(function startYouTubeKeepAlive(){
-
-  if (document.getElementById('yt-keepalive')) return;
-
-  const VIDEO_ID = 'YBaJlczeduE'; // ganti sesuai kebutuhan (video panjang / live ambience)
-
-  const iframe = document.createElement('iframe');
-  iframe.id = 'yt-keepalive';
-
-  iframe.src =
-    `https://www.youtube.com/embed/${VIDEO_ID}?` +
-    `autoplay=1` +
-    `&mute=0` +            // HARUS ada audio
-    `&controls=0` +
-    `&loop=1` +
-    `&playlist=${VIDEO_ID}` + // trik loop 1 video
-    `&playsinline=1&vq=tiny`;
-
-  iframe.allow =
-    'autoplay; encrypted-media; picture-in-picture';
-
-  iframe.style.position = 'fixed';
-  iframe.style.bottom = '0px';
-  iframe.style.right = '0px';
-  iframe.style.width = '10px';
-  iframe.style.height = '10px';
-  iframe.style.opacity = '0.05';
-  iframe.style.pointerEvents = 'none';
-  iframe.style.zIndex = '9999';
-  iframe.style.border = 'none';
-
-  document.body.appendChild(iframe);
-
-  console.log('[KEEPALIVE] YouTube iframe keepalive aktif');
-
-})();
-*/
 
 let ytPlayer = null;
 
@@ -79,6 +41,40 @@ function startKeepAliveVideo(videoId="35Ok821_MxE") {
       }
     });
   };
+}
+
+function stopKeepAliveVideo() {
+  const iframe = document.getElementById("yt-keepalive");
+  if (!iframe) return;
+  iframe.src = "about:blank";
+}
+
+let BOT_TERMINATED = false;
+
+async function terminateBot(reason, isError=false) {
+  if (BOT_TERMINATED) return;
+  BOT_TERMINATED = true;
+
+  console.warn('[BOT TERMINATE]', reason);
+
+  try { stopKeepAliveVideo(); } catch {}
+
+  try {
+    const pesan = buildFinishSpeech(
+      user?.name || 'User',
+      NAMA_KECAMATAN || '-',
+      statSuccess || 0
+    );
+
+    await finishNotification(pesan);
+
+  } catch(e) {
+    console.warn('TTS gagal:', e);
+  }
+
+  await sleep(1200);
+
+  if (isError) throw new Error(reason);
 }
 
 async function finishNotification(text) {
@@ -802,7 +798,10 @@ async function finishNotification(text) {
 		console.error(`[ERROR] ${err.message}`);
 		
 		if (failedAttempt >= MAX_FAILED_ATTEMPT) {
-		  throw new Error('Terlalu banyak kegagalan berturut-turut, hentikan bot');
+		  await terminateBot(
+			'Terlalu banyak kegagalan berturut-turut, hentikan bot',
+			true
+		  );
 		}
 
 		return { status: 'RETRY_SAME_IDSBR' };
@@ -1089,113 +1088,6 @@ async function finishNotification(text) {
 	document.getElementById('gc-elapsed').textContent =
 	  `Total durasi: ${formatDuration(totalMs)}`;
 	
-	const pesan = buildFinishSpeech(
-					user.name,
-					NAMA_KECAMATAN,
-					statSuccess
-				);
-
-	await finishNotification(pesan);
+	await terminateBot('Semua proses selesai');
 
 })();
-
-
-/* ===== GC STABILITY PATCH (INTEGRATED) ===== */
-
-// bot_stability_patch.js
-// Adds: wake lock, stagnation detection, auto refresh recovery
-
-(function(){
-  const CFG = {
-    CARD_SELECTOR: '#usaha-cards-container .usaha-card',
-    EMPTY_SELECTOR: '#usaha-cards-container .empty-state',
-    LOAD_MORE_SELECTOR: 'button, .load-more, [data-testid="load-more"]',
-    MAX_STAGNANT: 3,
-    CHECK_INTERVAL: 4000,
-    STORAGE_KEY: 'gc_last_session'
-  };
-
-  let lastCount = 0;
-  let stagnant = 0;
-  let timer = null;
-  let wakeLock = null;
-
-  async function enableWakeLock(){
-    try{
-      if('wakeLock' in navigator){
-        wakeLock = await navigator.wakeLock.request('screen');
-        wakeLock.addEventListener('release', ()=> console.log('[WAKELOCK] released'));
-        console.log('[WAKELOCK] active');
-      }
-    }catch(e){ console.log('[WAKELOCK] failed', e.message); }
-  }
-
-  function countCards(){
-    return document.querySelectorAll(CFG.CARD_SELECTOR).length;
-  }
-
-  function hasEmpty(){
-    return document.querySelector(CFG.EMPTY_SELECTOR) !== null;
-  }
-
-  function clickLoadMore(){
-    const btn = document.querySelector(CFG.LOAD_MORE_SELECTOR);
-    if(btn){ btn.click(); console.log('[BOT] click load more'); return true; }
-    return false;
-  }
-
-  function saveSession(id){
-    if(id) localStorage.setItem(CFG.STORAGE_KEY, id);
-  }
-
-  function recoverInfo(){
-    return localStorage.getItem(CFG.STORAGE_KEY);
-  }
-
-  function refreshRecover(){
-    console.warn('[RECOVERY] refresh triggered');
-    location.reload();
-  }
-
-  function monitor(){
-    const c = countCards();
-
-    if(hasEmpty()){
-      console.log('[BOT] Semua usaha habis diproses');
-      clearInterval(timer);
-      return;
-    }
-
-    if(c === lastCount){
-      stagnant++;
-      console.log('[MONITOR] stagnant', stagnant, 'count=', c);
-      clickLoadMore();
-
-      if(stagnant >= CFG.MAX_STAGNANT){
-        refreshRecover();
-      }
-    }else{
-      stagnant = 0;
-      lastCount = c;
-      console.log('[MONITOR] progress', c);
-    }
-  }
-
-  window.GCStability = {
-    start(sessionId){
-      saveSession(sessionId);
-      enableWakeLock();
-      lastCount = countCards();
-      timer = setInterval(monitor, CFG.CHECK_INTERVAL);
-      console.log('[GCStability] started, session=', sessionId, 'recover=', recoverInfo());
-    },
-    stop(){
-      if(timer) clearInterval(timer);
-      if(wakeLock) wakeLock.release();
-    }
-  };
-})();
-
-
-// Auto start if idSesiGC exists
-try { if (typeof idSesiGC !== 'undefined') GCStability.start(idSesiGC); } catch(e){}
