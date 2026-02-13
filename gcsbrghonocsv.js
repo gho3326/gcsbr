@@ -230,6 +230,38 @@ async function finishNotification(text) {
 			.replace(/\s{2,}/g," ")
 			.trim();
 	}
+	
+	const usedCoordinates = new Set();
+
+	function keyCoord(lat, lon){
+		return lat.toFixed(6)+","+lon.toFixed(6);
+	}
+	
+	function offsetCoordinate(lat, lon, minMeters=20, maxMeters=100){
+
+		const R = 6378137; // radius bumi (meter)
+
+		const distance = Math.random() * (maxMeters - minMeters) + minMeters;
+		const bearing  = Math.random() * 2 * Math.PI;
+
+		const latRad = lat * Math.PI/180;
+		const lonRad = lon * Math.PI/180;
+
+		const newLat = Math.asin(
+			Math.sin(latRad) * Math.cos(distance/R) +
+			Math.cos(latRad) * Math.sin(distance/R) * Math.cos(bearing)
+		);
+
+		const newLon = lonRad + Math.atan2(
+			Math.sin(bearing) * Math.sin(distance/R) * Math.cos(latRad),
+			Math.cos(distance/R) - Math.sin(latRad) * Math.sin(newLat)
+		);
+
+		return {
+			latitude:  (newLat * 180/Math.PI).toFixed(7),
+			longitude: (newLon * 180/Math.PI).toFixed(7)
+		};
+	}
 
 	let BOT_TERMINATED = false;
 
@@ -830,8 +862,29 @@ async function finishNotification(text) {
 						}
 
 						if(coord){
-							latEl.value = coord.latitude;
-							lonEl.value = coord.longitude;
+							
+							let lat = parseFloat(coord.latitude);
+							let lon = parseFloat(coord.longitude);
+
+							let key = keyCoord(lat, lon);
+
+							if(usedCoordinates.has(key)){
+								console.log("Duplikat terdeteksi → offset 20-100m");
+
+								const newCoord = offsetCoordinate(lat, lon, 20, 100);
+								lat = parseFloat(newCoord.latitude);
+								lon = parseFloat(newCoord.longitude);
+
+								key = keyCoord(lat, lon);
+							}
+
+							usedCoordinates.add(key);
+
+							latEl.value = lat;
+							lonEl.value = lon;
+							
+							console.log("NEW KOORDINAT:", coord.latitude, coord.longitude);
+							
 						}else{
 							console.log('[WARN] Semua level geocode gagal');
 						}
