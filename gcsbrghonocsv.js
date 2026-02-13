@@ -262,6 +262,60 @@ async function finishNotification(text) {
 			longitude: (newLon * 180/Math.PI).toFixed(7)
 		};
 	}
+	
+	function distanceMeters(lat1, lon1, lat2, lon2){
+		const R = 6378137;
+
+		const dLat = (lat2-lat1) * Math.PI/180;
+		const dLon = (lon2-lon1) * Math.PI/180;
+
+		const a =
+			Math.sin(dLat/2)**2 +
+			Math.cos(lat1*Math.PI/180) *
+			Math.cos(lat2*Math.PI/180) *
+			Math.sin(dLon/2)**2;
+
+		return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	}
+	
+	const usedPoints = [];
+	
+	function findFreeCoordinate(lat, lon){
+
+		let attempt = 0;
+
+		while(attempt < 30){ // batas safety
+
+			const candidate =
+				attempt === 0
+				? {latitude:lat, longitude:lon}
+				: offsetCoordinate(lat, lon, 20, 100);
+
+			let collide = false;
+
+			for(const p of usedPoints){
+				const d = distanceMeters(
+					candidate.latitude, candidate.longitude,
+					p.latitude, p.longitude
+				);
+
+				if(d < 20){ // minimal jarak antar titik
+					collide = true;
+					break;
+				}
+			}
+
+			if(!collide){
+				usedPoints.push(candidate);
+				return candidate;
+			}
+
+			attempt++;
+		}
+
+		console.log("WARNING: tidak dapat posisi unik");
+		return candidate;
+	}
 
 	let BOT_TERMINATED = false;
 
@@ -866,24 +920,15 @@ async function finishNotification(text) {
 							let lat = parseFloat(coord.latitude);
 							let lon = parseFloat(coord.longitude);
 
-							let key = keyCoord(lat, lon);
+							const finalCoord = findFreeCoordinate(lat, lon);
 
-							if(usedCoordinates.has(key)){
-								console.log("Duplikat terdeteksi → offset 20-100m");
-
-								const newCoord = offsetCoordinate(lat, lon, 20, 100);
-								lat = parseFloat(newCoord.latitude);
-								lon = parseFloat(newCoord.longitude);
-
-								key = keyCoord(lat, lon);
-							}
-
-							usedCoordinates.add(key);
-
-							latEl.value = lat;
-							lonEl.value = lon;
+							const finalLatitude = finalCoord.latitude.toFixed(7);
+							const finalLongitude = finalCoord.longitude.toFixed(7);
 							
-							console.log("NEW KOORDINAT:", coord.latitude, coord.longitude);
+							latEl.value = finalLatitude;
+							lonEl.value = finalLongitude;
+							
+							console.log("NEW KOORDINAT:", finalLatitude, finalLongitude);
 							
 						}else{
 							console.log('[WARN] Semua level geocode gagal');
