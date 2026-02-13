@@ -119,6 +119,88 @@ async function finishNotification(text) {
 	function buildFinishSpeech(user, kecamatan, sukses) {
 		return `Halo saudara ${user}, proses GC anda di kecamatan ${kecamatan} telah selesai dengan jumlah sukses GC sebanyak ${sukses} data usaha. Terima kasih`;
 	}
+	
+	const coordCache = new Map();   // alamat -> koordinat final
+	const globalPoints = [];        // semua titik yg pernah dipakai
+
+	async function geocodeBase(alamat){
+	  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(alamat)}&countrycodes=id&limit=1`;
+
+	  const r = await fetch(url,{headers:{'Accept':'application/json'}});
+	  const j = await r.json();
+
+	  if(!j.length) return null;
+
+	  return {
+		lat: parseFloat(j[0].lat),
+		lon: parseFloat(j[0].lon)
+	  };
+	}
+	
+	function dist(a,b){
+	  const R=6371000;
+	  const t=x=>x*Math.PI/180;
+
+	  const dLat=t(b.lat-a.lat);
+	  const dLon=t(b.lon-a.lon);
+
+	  const x=Math.sin(dLat/2)**2+
+		Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLon/2)**2;
+
+	  return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+	}
+	
+	function placeInRing(center,min=20,max=100){
+
+	  for(let i=0;i<80;i++){
+
+		const r=Math.sqrt(Math.random()*(max*max-min*min)+min*min);
+		const ang=Math.random()*Math.PI*2;
+
+		const lat=center.lat + (r*Math.sin(ang))/111320;
+		const lon=center.lon + (r*Math.cos(ang))/(111320*Math.cos(center.lat*Math.PI/180));
+
+		const candidate={lat,lon};
+
+		let ok=true;
+		for(const p of globalPoints){
+		  if(dist(candidate,p)<min){ ok=false; break; }
+		}
+
+		if(ok){
+		  globalPoints.push(candidate);
+		  return candidate;
+		}
+	  }
+
+	  globalPoints.push(center);
+	  return center;
+	}
+	
+	async function resolveCoord(alamat){
+
+	  if(coordCache.has(alamat))
+		return coordCache.get(alamat);
+
+	  const base=await geocodeBase(alamat);
+	  if(!base) return null;
+
+	  const final=placeInRing(base,20,100);
+
+	  coordCache.set(alamat,final);
+	  return final;
+	}
+	
+	async function getLatitudeLongitude(alamat){
+
+	  const c = await resolveCoord(alamat);
+	  if(!c) return null;
+
+	  return {
+		latitude: c.lat.toFixed(7),
+		longitude: c.lon.toFixed(7)
+	  };
+	}
 
 	let BOT_TERMINATED = false;
 
@@ -496,64 +578,6 @@ async function finishNotification(text) {
 		`<span style="color: #0f0;">Sukses: <strong>${statSuccess}</strong></span> | 
 		<span style="color: red;">Gagal: <strong>${statFailed}</strong></span>`;
 	}
-/*
-	async function updateProgress(processed, total) {
-	  const percent = Math.floor((processed / total) * 100);
-
-	  document.getElementById('gc-progress-bar').style.width = percent + '%';
-	  document.getElementById('gc-progress-text').textContent =
-		`Progress: ${processed}/${total} (${percent}%)`;
-
-	  // POST ke server tiap kelipatan 10%, HANYA SEKALI
-	  if (percent >= lastPostedPercent + 10) {
-		lastPostedPercent = percent - (percent % 10);
-
-		try {
-		  await logSelesaiProses({
-			sukses: statSuccess,
-			gagal: statFailed,
-			total: rows.length
-		  });
-		} catch (e) {
-		  console.warn('[GC] Gagal kirim progress:', e.message);
-		}
-	  }
-	}
-
-	function updateETA(processed, total) {//update Estimasi waktu selesai (ETA)
-		if (processed === 0 || total === 0) return;
-
-		const now = Date.now();
-		const elapsed = now - startTime;
-		const avgPerItem = elapsed / processed;
-		const remaining = total - processed;
-		const etaMs = Math.max(0, avgPerItem * remaining);
-
-		// === PROSES BELUM SELESAI ===
-		if (processed < total) {
-			const etaText = formatDuration(etaMs);
-
-			const finishTime = new Date(now + etaMs);
-			const hh = String(finishTime.getHours()).padStart(2, '0');
-			const mm = String(finishTime.getMinutes()).padStart(2, '0');
-
-			document.getElementById('gc-eta').textContent =
-			  `Selesai: ± ${etaText} lagi (jam ${hh}:${mm})`;
-
-			return;
-		}
-
-		// === PROSES SELESAI ===
-		const totalDurationText = formatDuration(elapsed);
-
-		const finishTime = new Date(now);
-		const hh = String(finishTime.getHours()).padStart(2, '0');
-		const mm = String(finishTime.getMinutes()).padStart(2, '0');
-
-		document.getElementById('gc-eta').textContent =
-			`Selesai Jam ${hh}:${mm} · Total: ${totalDurationText}`;
-	}
-*/
 
 	function updateSpeed(processed) {
 	  if (processed === 0) return;
@@ -665,6 +689,7 @@ async function finishNotification(text) {
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
 
+		  /*
 		  const f_latlong = document.querySelector('#f_latlong');
 		  if (f_latlong) {//hanya usaha yang sudah ada latitude dan longitudenya
 			  f_latlong.scrollIntoView({ block: 'center' });
@@ -673,6 +698,7 @@ async function finishNotification(text) {
 			  f_latlong.value = "ADA";
 			  //f_latlong.dispatchEvent(new Event('change', { bubbles: true }));
 		  }
+		  */
 		  //await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 	  
 		  const f_gc = document.querySelector('#f_gc');
@@ -741,6 +767,34 @@ async function finishNotification(text) {
 
 					select.value = String(statusCode);
 					select.dispatchEvent(new Event('change', { bubbles: true }));
+					
+					// ambil element sekali saja
+					const latEl = await waitForSelector('#tt_latitude_cek_user');
+					const lonEl = await waitForSelector('#tt_longitude_cek_user');
+
+					const latitude = latEl.value?.trim();
+					const longitude = lonEl.value?.trim();
+
+					if(!latitude || !longitude){
+						const alamat_usaha = (await waitForSelector('#tt_alamat_usaha_gc')).value?.trim();
+						
+						if(alamat_usaha){
+							const coord = await getLatitudeLongitude(alamat_usaha);
+							
+							if(coord){
+								console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
+								
+								console.log('[STEP] Isi koordinat');
+								// isi value
+								latEl.value = coord.latitude;
+								lonEl.value = coord.longitude;
+							}else{
+								console.log('[WARN] Geocode gagal, koordinat null');
+							}
+						}else{
+							console.log('[WARN] Alamat kosong');
+						}
+					}
 
 				  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 				  console.log(`[DELAY] Tunggu sebelum klik SIMPAN ${delay} ms`);
