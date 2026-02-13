@@ -798,7 +798,7 @@ async function finishNotification(text) {
 						const {provinsi, kabupaten} = getWilayahGC();
 
 						const alamatLengkap =
-							nama_usaha + ", "+
+							// nama_usaha + ", "+
 							alamat_usaha + ", "+
 							NAMA_KECAMATAN + ", " +
 							kabupaten + ", " +
