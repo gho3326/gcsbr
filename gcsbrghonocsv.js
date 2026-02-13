@@ -216,6 +216,20 @@ async function finishNotification(text) {
 
 		return {provinsi, kabupaten};
 	}
+	
+	function normalizeAlamat(alamat){
+		if(!alamat) return "";
+
+		return alamat
+			.replace(/\b(rt|rw)\s*\d+/gi,"")
+			.replace(/\bblok\s*\w+/gi,"")
+			.replace(/\bno\.?\s*\d+/gi,"")
+			.replace(/\bperum(ahan)?\b/gi,"")
+			.replace(/\bkomplek\b/gi,"")
+			.replace(/\bgang\b/gi,"")
+			.replace(/\s{2,}/g," ")
+			.trim();
+	}
 
 	let BOT_TERMINATED = false;
 
@@ -789,7 +803,40 @@ async function finishNotification(text) {
 
 					const latitude = latEl.value?.trim();
 					const longitude = lonEl.value?.trim();
+					
+					if(!latitude || !longitude){
 
+						const alamat_usaha_raw = (await waitForSelector('#tt_alamat_usaha_gc')).value?.trim();
+						const alamat_usaha = normalizeAlamat(alamat_usaha_raw);
+
+						const {provinsi, kabupaten} = getWilayahGC();
+
+						const queries = [
+							`${alamat_usaha}, ${NAMA_KECAMATAN}, ${kabupaten}, ${provinsi}, Indonesia`,
+							`${NAMA_KECAMATAN}, ${kabupaten}, ${provinsi}, Indonesia`
+						];
+
+						let coord = null;
+
+						for(const q of queries){
+							console.log("Geocode:", q);
+
+							coord = await getLatitudeLongitude(q);
+
+							if(coord && coord.latitude && coord.longitude){
+								console.log("SUCCESS:", coord.latitude, coord.longitude);
+								break;
+							}
+						}
+
+						if(coord){
+							latEl.value = coord.latitude;
+							lonEl.value = coord.longitude;
+						}else{
+							console.log('[WARN] Semua level geocode gagal');
+						}
+					}
+					/*
 					if(!latitude || !longitude){
 						
 						const nama_usaha   = (await waitForSelector('#tt_nama_usaha_gc')).value?.trim();
@@ -797,16 +844,16 @@ async function finishNotification(text) {
 						
 						const {provinsi, kabupaten} = getWilayahGC();
 
-						const alamatLengkap =
-							// nama_usaha + ", "+
+						let alamatLengkap =
+							nama_usaha + ", "+
 							alamat_usaha + ", "+
 							NAMA_KECAMATAN + ", " +
 							kabupaten + ", " +
 							provinsi + ", Indonesia";
 						
 						console.log('Alamat lengkap: ' + alamatLengkap);
-						const coord = await getLatitudeLongitude(alamatLengkap);
 						
+						let coord = await getLatitudeLongitude(alamatLengkap);
 						if(coord){
 							console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
 							
@@ -815,10 +862,42 @@ async function finishNotification(text) {
 							latEl.value = coord.latitude;
 							lonEl.value = coord.longitude;
 						}else{
-							console.log('[WARN] Geocode gagal, koordinat null');
+							alamatLengkap =
+								alamat_usaha + ", "+
+								NAMA_KECAMATAN + ", " +
+								kabupaten + ", " +
+								provinsi + ", Indonesia";
+							
+							coord = await getLatitudeLongitude(alamatLengkap);
+							if(coord){
+								console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
+								
+								console.log('[STEP] Isi koordinat');
+								// isi value
+								latEl.value = coord.latitude;
+								lonEl.value = coord.longitude;
+							}else{
+								alamatLengkap =
+									NAMA_KECAMATAN + ", " +
+									kabupaten + ", " +
+									provinsi + ", Indonesia";
+								
+								coord = await getLatitudeLongitude(alamatLengkap);
+								if(coord){
+									console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
+									
+									console.log('[STEP] Isi koordinat');
+									// isi value
+									latEl.value = coord.latitude;
+									lonEl.value = coord.longitude;
+								}else{
+									console.log('[WARN] Geocode gagal, koordinat null');
+								}
+							}
 						}
+						
 					}
-
+					*/
 				  delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
 				  console.log(`[DELAY] Tunggu sebelum klik SIMPAN ${delay} ms`);
 				  await sleep(delay);
