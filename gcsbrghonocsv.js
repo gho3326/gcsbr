@@ -239,7 +239,7 @@ async function finishNotification(text) {
 	
 	function offsetCoordinate(lat, lon, minMeters=20, maxMeters=100){
 
-		const R = 6378137; // radius bumi (meter)
+		const R = 6378137;
 
 		const distance = Math.random() * (maxMeters - minMeters) + minMeters;
 		const bearing  = Math.random() * 2 * Math.PI;
@@ -258,8 +258,8 @@ async function finishNotification(text) {
 		);
 
 		return {
-			latitude:  (newLat * 180/Math.PI).toFixed(7),
-			longitude: (newLon * 180/Math.PI).toFixed(7)
+			latitude:  newLat * 180/Math.PI,
+			longitude: newLon * 180/Math.PI
 		};
 	}
 	
