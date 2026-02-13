@@ -201,6 +201,21 @@ async function finishNotification(text) {
 		longitude: c.lon.toFixed(7)
 	  };
 	}
+	
+	function getWilayahGC(){
+
+		const provSelect = document.querySelector('#f_provinsi');
+		const kabSelect  = document.querySelector('#f_kabupaten');
+
+		const provText = provSelect?.selectedOptions[0]?.text || "";
+		const kabText  = kabSelect?.selectedOptions[0]?.text || "";
+
+		// hapus kode [xx]
+		const provinsi  = provText.replace(/\[\d+\]\s*/,'').trim();
+		const kabupaten = kabText.replace(/\[\d+\]\s*/,'').trim();
+
+		return {provinsi, kabupaten};
+	}
 
 	let BOT_TERMINATED = false;
 
@@ -776,23 +791,31 @@ async function finishNotification(text) {
 					const longitude = lonEl.value?.trim();
 
 					if(!latitude || !longitude){
+						
+						const nama_usaha   = (await waitForSelector('#tt_nama_usaha_gc')).value?.trim();
 						const alamat_usaha = (await waitForSelector('#tt_alamat_usaha_gc')).value?.trim();
 						
-						if(alamat_usaha){
-							const coord = await getLatitudeLongitude(alamat_usaha);
+						const {provinsi, kabupaten} = getWilayahGC();
+
+						const alamatLengkap =
+							nama_usaha + ", "+
+							alamat_usaha + ", "+
+							NAMA_KECAMATAN + ", " +
+							kabupaten + ", " +
+							provinsi + ", Indonesia";
+						
+						console.log('Alamat lengkap: ' + alamatLengkap);
+						const coord = await getLatitudeLongitude(alamatLengkap);
+						
+						if(coord){
+							console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
 							
-							if(coord){
-								console.log('Lat: ' + coord.latitude + ' Long: ' + coord.longitude);
-								
-								console.log('[STEP] Isi koordinat');
-								// isi value
-								latEl.value = coord.latitude;
-								lonEl.value = coord.longitude;
-							}else{
-								console.log('[WARN] Geocode gagal, koordinat null');
-							}
+							console.log('[STEP] Isi koordinat');
+							// isi value
+							latEl.value = coord.latitude;
+							lonEl.value = coord.longitude;
 						}else{
-							console.log('[WARN] Alamat kosong');
+							console.log('[WARN] Geocode gagal, koordinat null');
 						}
 					}
 
