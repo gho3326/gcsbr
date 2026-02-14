@@ -150,7 +150,7 @@ async function finishNotification(text) {
 	  return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 	}
 	
-	function placeInRing(center,min=20,max=100){
+	function placeInRing(center,min=50,max=1000){
 
 	  for(let i=0;i<80;i++){
 
