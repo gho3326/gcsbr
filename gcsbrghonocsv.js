@@ -1220,7 +1220,7 @@ async function finishNotification(text) {
 	  });
 	}
 
-	async function cariUsahaValidDenganLoadMore(maxLoad = 10) {
+	async function cariUsahaValidDenganLoadMore(maxLoad = 1000) {
 	  for (let i = 0; i < maxLoad; i++) {
 		const card = getUsahaCardValidPertama();
 		if (card) return card;
