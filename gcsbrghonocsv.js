@@ -122,11 +122,31 @@ async function finishNotification(text) {
 	
 	const coordCache = new Map();   // alamat -> koordinat final
 	const globalPoints = [];        // semua titik yg pernah dipakai
+	let lastOSMCall = 0;
 
 	async function geocodeBase(alamat){
+
+	  const now = Date.now();
+	  const diff = now - lastOSMCall;
+
+	  if(diff < 1100){
+		await sleep(1100 - diff);
+	  }
+
+	  lastOSMCall = Date.now();
+
 	  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(alamat)}&countrycodes=id&limit=1`;
 
-	  const r = await fetch(url,{headers:{'Accept':'application/json'}});
+	  const r = await fetch(url,{
+		headers:{'Accept':'application/json'}
+	  });
+
+	  if(r.status === 425){
+		console.warn("OSM throttled (425)");
+		await sleep(3000);
+		return null;
+	  }
+
 	  const j = await r.json();
 
 	  if(!j.length) return null;
