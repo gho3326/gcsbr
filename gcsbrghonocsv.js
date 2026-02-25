@@ -867,7 +867,7 @@ async function finishNotification(text) {
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			
-			const btn_aktif = document.querySelector('.filter-tab.active');
+			const btn_aktif = [...document.querySelectorAll('.filter-tab')].find(btn => btn.textContent.trim() === 'Aktif');
 			  
 			if (btn_aktif) {//filter hanya usaha yang aktif
 			  btn_aktif.scrollIntoView({ block: 'center' });
