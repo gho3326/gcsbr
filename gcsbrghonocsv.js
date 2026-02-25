@@ -875,7 +875,9 @@ async function finishNotification(text) {
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_aktif.click();
 			}
-			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			
+			// tunggu sampai spinner HILANG
+			await waitForBlockUIFinishMO();
 			
 			const card = await cariUsahaValidDenganLoadMore();//usaha-card terpilih
 			
