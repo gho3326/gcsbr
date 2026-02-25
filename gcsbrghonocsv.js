@@ -157,6 +157,41 @@ async function finishNotification(text) {
 	  };
 	}
 	
+	const GOOGLE_API_KEY = "AIzaSyCgMcWJ7KLK37xxtmEdL6c6Eo5JSo-uYiw";
+
+	let googleCache = new Map();
+
+	async function geocodeGoogle(alamat){
+
+	  if(googleCache.has(alamat)){
+		return googleCache.get(alamat);
+	  }
+
+	  const url =
+		"https://maps.googleapis.com/maps/api/geocode/json?address=" +
+		encodeURIComponent(alamat) +
+		"&region=id&key=" + GOOGLE_API_KEY;
+
+	  const r = await fetch(url);
+	  const j = await r.json();
+
+	  if(j.status !== "OK" || !j.results.length){
+		console.warn("Google gagal:", j.status);
+		return null;
+	  }
+
+	  const loc = j.results[0].geometry.location;
+
+	  const result = {
+		lat: loc.lat,
+		lon: loc.lng
+	  };
+
+	  googleCache.set(alamat, result);
+
+	  return result;
+	}
+
 	function dist(a,b){
 	  const R=6371000;
 	  const t=x=>x*Math.PI/180;
@@ -938,15 +973,30 @@ async function finishNotification(text) {
 
 						for(const q of queries){
 							console.log("Geocode:", q);
+							
+							const base = await geocodeGoogle(q);
 
+							if(base){
+								const finalCoord = findFreeCoordinate(base.lat, base.lon);
+
+								const finalLatitude = finalCoord.latitude.toFixed(7);
+								const finalLongitude = finalCoord.longitude.toFixed(7);
+								
+								latEl.value = finalLatitude;
+								lonEl.value = finalLongitude;
+								
+								console.log("NEW KOORDINAT:", finalLatitude, finalLongitude);
+							}
+							/*
 							coord = await getLatitudeLongitude(q);
 
 							if(coord && coord.latitude && coord.longitude){
 								console.log("SUCCESS:", coord.latitude, coord.longitude);
 								break;
 							}
+							*/
 						}
-
+						/*
 						if(coord){
 							
 							let lat = parseFloat(coord.latitude);
@@ -965,6 +1015,7 @@ async function finishNotification(text) {
 						}else{
 							console.log('[WARN] Semua level geocode gagal');
 						}
+						*/
 					}else{
 						console.log('Sudah ada koordinat, tidak perlu geocode');
 					}
