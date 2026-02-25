@@ -93,6 +93,7 @@ async function finishNotification(text) {
   let statFailed = 0;
   //let lastPostedPercent = 0;
   let startTime = Date.now();
+  let klik_aktif = false;
   
   const MAX_TOTAL_PROCESS = 10000;
   
@@ -935,11 +936,12 @@ async function finishNotification(text) {
 			
 			const btn_aktif = [...document.querySelectorAll('.filter-tab')].find(btn => btn.textContent.trim() === 'Aktif');
 			  
-			if (btn_aktif) {//filter hanya usaha yang aktif
+			if (btn_aktif && !klik_aktif) {//filter hanya usaha yang aktif
 			  btn_aktif.scrollIntoView({ block: 'center' });
 			  btn_aktif.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  btn_aktif.click();
+			  klik_aktif = true;
 			}
 			
 			// tunggu sampai spinner HILANG
@@ -1377,9 +1379,9 @@ async function finishNotification(text) {
 		  break;
 		}
 
-	  const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
-	  console.log(`[LOOP] Delay ${delay} ms`);
-	  await sleep(delay);
+	  // const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
+	  // console.log(`[LOOP] Delay ${delay} ms`);
+	  // await sleep(delay);
 	}
 
 	/* ===================== POST DATA SAAT SELESAI ===================== */
