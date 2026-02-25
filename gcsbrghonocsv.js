@@ -1377,9 +1377,9 @@ async function finishNotification(text) {
 		  break;
 		}
 
-	  // const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
-	  // console.log(`[LOOP] Delay ${delay} ms`);
-	  // await sleep(delay);
+	  const delay = randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX);
+	  console.log(`[LOOP] Delay ${delay} ms`);
+	  await sleep(delay);
 	}
 
 	/* ===================== POST DATA SAAT SELESAI ===================== */
