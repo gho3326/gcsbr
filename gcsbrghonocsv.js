@@ -205,28 +205,22 @@ async function finishNotification(text) {
 	
 	const cache = {};
 
-	async function geocodeWithCacheAndOffset(query){
+	async function geocodeWithCache(query){
 
-	  // 1️⃣ cek cache
 	  if(cache[query]){
 		console.log("Cache hit:", query);
-
-		const base = cache[query];
-		return offsetCoordinate(base.lat, base.lon, 30);
+		return cache[query]; // TANPA OFFSET
 	  }
 
-	  // 2️⃣ call API
 	  const result = await geocodeOpenCage(query);
 
 	  if(!result){
 		return null;
 	  }
 
-	  // 3️⃣ simpan cache
 	  cache[query] = result;
 
-	  // 4️⃣ offset
-	  return offsetCoordinate(result.lat, result.lon, 30);
+	  return result; // TANPA OFFSET
 	}
 
 	function dist(a,b){
@@ -1011,7 +1005,7 @@ async function finishNotification(text) {
 						for(const q of queries){
 							console.log("Geocode:", q);
 							
-							const base = await geocodeWithCacheAndOffset(q);
+							const base = await geocodeWithCache(q);
 
 							if(base){
 								const finalCoord = findFreeCoordinate(base.lat, base.lon);
