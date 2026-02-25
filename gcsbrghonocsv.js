@@ -142,7 +142,7 @@ async function finishNotification(text) {
 	  });
 
 	  if(r.status === 425){
-		console.warn("OSM throttled (425)");
+		console.warn("OSM throttled error: 425");
 		await sleep(3000);
 		return null;
 	  }
@@ -864,6 +864,16 @@ async function finishNotification(text) {
 			  toggle_filter.focus();
 			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			  toggle_filter.click();
+			}
+			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			
+			const btn_aktif = document.querySelector('.filter-tab.active');
+			  
+			if (btn_aktif) {//filter hanya usaha yang aktif
+			  btn_aktif.scrollIntoView({ block: 'center' });
+			  btn_aktif.focus();
+			  await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
+			  btn_aktif.click();
 			}
 			await sleep(randomDelay(TOTAL_DELAY_MIN, TOTAL_DELAY_MAX));
 			
