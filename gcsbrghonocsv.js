@@ -617,6 +617,11 @@ async function finishNotification(text) {
 	function getNamaKecamatan(selectEl) {
 	  if (!selectEl) return '';
 
+	  // ⬅ Tambahan: jika value kosong, kembalikan kosong
+	  if (!selectEl.value || selectEl.value.trim() === '') {
+		return '';
+	  }
+
 	  const opt = selectEl.options[selectEl.selectedIndex];
 	  if (!opt) return '';
 
