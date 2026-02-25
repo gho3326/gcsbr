@@ -164,7 +164,7 @@ async function finishNotification(text) {
 	}
 
 	async function geocodeOpenCage(query, retry = true) {
-	  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(query)}&key=${OPENCAGE_KEY}&limit=1&no_annotations=1`;
+	  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(query)}&key=${OPENCAGE_KEY}&limit=1&no_annotations=1&countrycode=id&address_only=1`;
 
 	  try {
 		const controller = new AbortController();
