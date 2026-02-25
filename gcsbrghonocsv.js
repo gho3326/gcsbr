@@ -157,39 +157,76 @@ async function finishNotification(text) {
 	  };
 	}
 	
-	const GOOGLE_API_KEY = "AIzaSyCgMcWJ7KLK37xxtmEdL6c6Eo5JSo-uYiw";
+	const OPENCAGE_KEY = "aa159ca1840d4d0780596019ece21fe0";
 
-	let googleCache = new Map();
+	function delay(ms) {
+	  return new Promise(resolve => setTimeout(resolve, ms));
+	}
 
-	async function geocodeGoogle(alamat){
+	async function geocodeOpenCage(query, retry = true) {
+	  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(query)}&key=${OPENCAGE_KEY}&limit=1&no_annotations=1`;
 
-	  if(googleCache.has(alamat)){
-		return googleCache.get(alamat);
+	  try {
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+
+		const res = await fetch(url, { signal: controller.signal });
+		clearTimeout(timeout);
+
+		if (!res.ok) {
+		  console.error("HTTP error:", res.status);
+		  if (retry) {
+			await delay(2000);
+			return geocodeOpenCage(query, false);
+		  }
+		  return null;
+		}
+
+		const data = await res.json();
+
+		if (!data.results || data.results.length === 0) {
+		  return null;
+		}
+
+		return {
+		  lat: data.results[0].geometry.lat,
+		  lon: data.results[0].geometry.lng
+		};
+
+	  } catch (err) {
+		console.error("Geocode error:", err);
+		if (retry) {
+		  await delay(2000);
+		  return geocodeOpenCage(query, false);
+		}
+		return null;
+	  }
+	}
+	
+	const cache = {};
+
+	async function geocodeWithCacheAndOffset(query){
+
+	  // 1️⃣ cek cache
+	  if(cache[query]){
+		console.log("Cache hit:", query);
+
+		const base = cache[query];
+		return offsetCoordinate(base.lat, base.lon, 30);
 	  }
 
-	  const url =
-		"https://maps.googleapis.com/maps/api/geocode/json?address=" +
-		encodeURIComponent(alamat) +
-		"&region=id&key=" + GOOGLE_API_KEY;
+	  // 2️⃣ call API
+	  const result = await geocodeOpenCage(query);
 
-	  const r = await fetch(url);
-	  const j = await r.json();
-
-	  if(j.status !== "OK" || !j.results.length){
-		console.warn("Google gagal:", j.status);
+	  if(!result){
 		return null;
 	  }
 
-	  const loc = j.results[0].geometry.location;
+	  // 3️⃣ simpan cache
+	  cache[query] = result;
 
-	  const result = {
-		lat: loc.lat,
-		lon: loc.lng
-	  };
-
-	  googleCache.set(alamat, result);
-
-	  return result;
+	  // 4️⃣ offset
+	  return offsetCoordinate(result.lat, result.lon, 30);
 	}
 
 	function dist(a,b){
@@ -974,7 +1011,7 @@ async function finishNotification(text) {
 						for(const q of queries){
 							console.log("Geocode:", q);
 							
-							const base = await geocodeGoogle(q);
+							const base = await geocodeWithCacheAndOffset(q);
 
 							if(base){
 								const finalCoord = findFreeCoordinate(base.lat, base.lon);
